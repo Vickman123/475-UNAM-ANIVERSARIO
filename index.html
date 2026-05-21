@@ -1,0 +1,3878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UNAM 475 — Concebir Futuros</title>
+  
+  <!-- Google Fonts: Outfit (modern tech/sans), Space Grotesk (tech accent), & Playfair Display (classic serif) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,800;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       VARIABLES Y PALETA DE COLORES (Paleta oficial del usuario)
+       ========================================================================== */
+    :root {
+      --azul-base: #0E3659;
+      --verde-limon: #9AD95B;
+      --verde-salvia: #B4D98F;
+      --oro-warm: #D99543;
+      --blanco-hueso: #F2F1F0;
+      
+      --negro-profundo: #051320;
+      --glass-bg: rgba(14, 54, 89, 0.35);
+      --glass-border: rgba(242, 241, 240, 0.1);
+      --glow-shadow: 0 0 25px rgba(154, 217, 91, 0.3);
+      --gold-glow-shadow: 0 0 25px rgba(217, 149, 67, 0.3);
+      
+      --font-main: 'Outfit', sans-serif;
+      --font-tech: 'Space Grotesk', sans-serif;
+      --font-serif: 'Playfair Display', serif;
+    }
+
+    /* ==========================================================================
+       RESET & BASE STYLES (100% Fullscreen, No scroll)
+       ========================================================================== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--negro-profundo);
+      color: var(--blanco-hueso);
+      font-family: var(--font-main);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      position: relative;
+    }
+
+    /* Hide standard cursor on desktop devices to enable custom holographic cursor */
+    @media (hover: hover) and (pointer: fine) {
+      body, a, button, select, input, .clickable {
+        cursor: none !important;
+      }
+    }
+
+    /* ==========================================================================
+       CINEMATIC BACKGROUND
+       ========================================================================== */
+    #background-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .ambient-aurora {
+      position: absolute;
+      width: 60vmax;
+      height: 60vmax;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: 0;
+      mix-blend-mode: screen;
+      animation: auroraOrbit 30s infinite alternate ease-in-out;
+    }
+
+    #aurora-1 {
+      background: radial-gradient(circle, var(--azul-base) 0%, transparent 70%);
+      top: -20%;
+      left: -10%;
+    }
+
+    #aurora-2 {
+      background: radial-gradient(circle, var(--oro-warm) 0%, transparent 70%);
+      bottom: -10%;
+      right: -10%;
+      animation-delay: -10s;
+    }
+
+    #aurora-3 {
+      background: radial-gradient(circle, var(--verde-limon) 0%, transparent 60%);
+      top: 40%;
+      left: 30%;
+      opacity: 0.08;
+      animation-delay: -5s;
+    }
+
+    @keyframes auroraOrbit {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      50% { transform: translate(8%, 12%) scale(1.15) rotate(180deg); }
+      100% { transform: translate(-5%, -5%) scale(0.9) rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       HOLOGRAPHIC CURSOR
+       ========================================================================== */
+    .custom-cursor {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      background-color: var(--verde-limon);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10000;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+      mix-blend-mode: difference;
+      display: none;
+    }
+
+    .custom-cursor-glow {
+      position: fixed;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(154, 217, 91, 0.4);
+      background-color: rgba(154, 217, 91, 0.03);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      /* Smooth follow lerp using JS */
+      transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s, height 0.3s, border-color 0.3s;
+      display: none;
+    }
+
+    body:hover .custom-cursor,
+    body:hover .custom-cursor-glow {
+      display: block;
+    }
+
+    .cursor-active .custom-cursor {
+      width: 16px;
+      height: 16px;
+      background-color: var(--oro-warm);
+    }
+
+    .cursor-active .custom-cursor-glow {
+      width: 60px;
+      height: 60px;
+      border-color: rgba(217, 149, 67, 0.6);
+      background-color: rgba(217, 149, 67, 0.08);
+      box-shadow: 0 0 20px rgba(217, 149, 67, 0.2);
+    }
+
+    /* ==========================================================================
+       MAIN FULLSCREEN DASHBOARD
+       ========================================================================== */
+    .app-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 3vh 20px;
+      perspective: 1000px;
+    }
+
+    /* HEADER */
+    header {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .navbar-logo {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(242, 241, 240, 0.2));
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .header-logo:hover .navbar-logo {
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 12px rgba(242, 241, 240, 0.4));
+    }
+
+    .header-cta-button {
+      padding: 10px 24px;
+      background: rgba(14, 54, 89, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      color: var(--blanco-hueso);
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-cta-button svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--verde-limon);
+      transition: transform 0.3s;
+    }
+
+    .header-cta-button:hover {
+      border-color: var(--verde-limon);
+      background: rgba(154, 217, 91, 0.1);
+      box-shadow: var(--glow-shadow);
+      transform: translateY(-2px);
+    }
+
+    .header-cta-button:hover svg {
+      transform: translateX(4px);
+    }
+
+    /* CENTER LOGO & ANNOUNCEMENT */
+    .center-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 800px;
+      z-index: 10;
+      transform: translate3d(0, -2vh, 0);
+    }
+
+    .center-badge {
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--verde-limon);
+      margin-bottom: 20px;
+      padding: 6px 16px;
+      background: rgba(154, 217, 91, 0.06);
+      border: 1px solid rgba(154, 217, 91, 0.15);
+      border-radius: 20px;
+      animation: floatMotion 4s ease-in-out infinite alternate;
+      box-shadow: inset 0 0 10px rgba(154, 217, 91, 0.05);
+    }
+
+    .center-display-475 {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .center-display-475 img,
+    .center-display-475 svg {
+      width: 280px;
+      height: auto;
+      filter: drop-shadow(0 0 25px rgba(217, 149, 67, 0.4));
+    }
+
+    .concept-title {
+      font-family: var(--font-serif);
+      font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+      font-weight: 800;
+      color: var(--blanco-hueso);
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 15px rgba(5, 19, 32, 0.8);
+    }
+
+    /* Phrase Slider Container */
+    .phrase-slider {
+      height: 35px;
+      overflow: hidden;
+      position: relative;
+      width: 100%;
+      margin-bottom: 4vh;
+    }
+
+    .phrase-track {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      width: 100%;
+      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .phrase-item {
+      height: 35px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      color: var(--verde-salvia);
+      font-family: var(--font-main);
+      text-transform: uppercase;
+      opacity: 0.5;
+      transition: opacity 0.6s, color 0.6s;
+    }
+
+    .phrase-item.active {
+      opacity: 1;
+      color: var(--blanco-hueso);
+      text-shadow: 0 0 10px rgba(242, 241, 240, 0.2);
+    }
+
+    /* Enter Captive Portal Button (Elegant & Interactive) */
+    .portal-action-btn {
+      padding: 16px 45px;
+      font-family: var(--font-tech);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--negro-profundo);
+      background: linear-gradient(135deg, var(--verde-limon) 0%, var(--verde-salvia) 100%);
+      border: none;
+      border-radius: 40px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(154, 217, 91, 0.4);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .portal-action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(242, 241, 240, 0.4), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .portal-action-btn:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(154, 217, 91, 0.6), var(--glow-shadow);
+      background: linear-gradient(135deg, var(--verde-salvia) 0%, var(--verde-limon) 100%);
+    }
+
+    .portal-action-btn:hover::before {
+      left: 100%;
+    }
+
+    .portal-action-btn:active {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(154, 217, 91, 0.4);
+    }
+
+    /* BOTTOM INTERACTIVE DOCK (FROSTED GLASSMORPHISM) */
+    .dock-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 40px;
+      padding: 10px 25px;
+      backdrop-filter: blur(25px) saturate(180%);
+      -webkit-backdrop-filter: blur(25px) saturate(180%);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 20;
+      box-shadow: 0 20px 50px rgba(5, 19, 32, 0.6);
+      transform: translate3d(0, 0, 0);
+      animation: dockFloat 6s ease-in-out infinite;
+    }
+
+    .dock-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      color: var(--blanco-hueso);
+      position: relative;
+      padding: 8px 12px;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s;
+    }
+
+    .dock-icon-circle {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: rgba(242, 241, 240, 0.05);
+      border: 1px solid rgba(242, 241, 240, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .dock-icon-circle svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--blanco-hueso);
+      fill: none;
+      transition: stroke 0.3s, transform 0.3s;
+    }
+
+    .dock-label {
+      font-family: var(--font-tech);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      transition: opacity 0.3s, color 0.3s;
+    }
+
+    /* Hover States for Dock Items */
+    .dock-item:hover {
+      transform: translateY(-8px);
+      color: var(--verde-limon);
+    }
+
+    .dock-item:hover .dock-icon-circle {
+      background: rgba(154, 217, 91, 0.1);
+      border-color: var(--verde-limon);
+      box-shadow: var(--glow-shadow);
+    }
+
+    .dock-item:hover .dock-icon-circle svg {
+      stroke: var(--verde-limon);
+      transform: scale(1.1);
+    }
+
+    .dock-item:hover .dock-label {
+      opacity: 1;
+      color: var(--verde-limon);
+    }
+
+    /* Pulse animation overlay for active ring */
+    .dock-icon-circle::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border-radius: 50%;
+      border: 1px solid var(--verde-limon);
+      opacity: 0;
+      transform: scale(0.9);
+      transition: all 0.4s;
+    }
+
+    .dock-item:hover .dock-icon-circle::after {
+      opacity: 0.4;
+      transform: scale(1);
+    }
+
+    /* Core / Special Highlight for Postcard Studio Button */
+    .dock-item.special-node {
+      transform: translateY(-12px);
+    }
+
+    .dock-item.special-node:hover {
+      transform: translateY(-20px);
+    }
+
+    .dock-item.special-node .dock-icon-circle {
+      width: 58px;
+      height: 58px;
+      background: linear-gradient(135deg, rgba(217, 149, 67, 0.2) 0%, rgba(154, 217, 91, 0.2) 100%);
+      border: 1.5px solid var(--oro-warm);
+      box-shadow: var(--gold-glow-shadow);
+      animation: pulseGold 2s infinite alternate;
+    }
+
+    .dock-item.special-node .dock-icon-circle svg {
+      width: 26px;
+      height: 26px;
+      stroke: var(--oro-warm);
+    }
+
+    .dock-item.special-node .dock-label {
+      color: var(--oro-warm);
+      font-weight: 700;
+      opacity: 0.9;
+      text-shadow: 0 0 10px rgba(217, 149, 67, 0.3);
+    }
+
+    .dock-item.special-node:hover .dock-icon-circle {
+      border-color: var(--verde-limon);
+      box-shadow: var(--glow-shadow), 0 0 30px rgba(217, 149, 67, 0.4);
+      background: linear-gradient(135deg, rgba(154, 217, 91, 0.25) 0%, rgba(217, 149, 67, 0.25) 100%);
+    }
+
+    .dock-item.special-node:hover .dock-icon-circle svg {
+      stroke: var(--verde-limon);
+    }
+
+    .dock-item.special-node:hover .dock-label {
+      color: var(--verde-limon);
+    }
+
+    /* ==========================================================================
+       MODALS SYSTEM (Futuristic esmerilado, scale & blur entry)
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 19, 32, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+      padding: 40px;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-pane {
+      width: 100%;
+      max-width: 1000px;
+      max-height: 85vh;
+      background: rgba(14, 54, 89, 0.55);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), inset 0 0 40px rgba(242, 241, 240, 0.02);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.9) translate3d(0, 40px, 0);
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .modal-overlay.active .modal-pane {
+      transform: scale(1) translate3d(0, 0, 0);
+    }
+
+    /* Laser decorative top border */
+    .modal-laser-bar {
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 10%, var(--oro-warm) 40%, var(--verde-limon) 60%, transparent 90%);
+      box-shadow: 0 0 10px var(--verde-limon);
+    }
+
+    /* Modal Close Button */
+    .modal-close-btn {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      background: rgba(242, 241, 240, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--blanco-hueso);
+      font-size: 1.1rem;
+      cursor: pointer;
+      z-index: 50;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(154, 217, 91, 0.15);
+      border-color: var(--verde-limon);
+      color: var(--verde-limon);
+      transform: rotate(90deg) scale(1.05);
+      box-shadow: var(--glow-shadow);
+    }
+
+    /* Modal Header */
+    .modal-header-section {
+      padding: 35px 40px 15px;
+    }
+
+    .modal-tag {
+      font-family: var(--font-tech);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--verde-limon);
+      margin-bottom: 8px;
+    }
+
+    .modal-title-text {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 800;
+      color: var(--blanco-hueso);
+    }
+
+    /* Modal Body (Scrollable) */
+    .modal-body-section {
+      flex: 1;
+      overflow-y: auto;
+      padding: 15px 40px 40px;
+    }
+
+    /* Custom scrollbar for modals */
+    .modal-body-section::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .modal-body-section::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .modal-body-section::-webkit-scrollbar-thumb {
+      background: rgba(242, 241, 240, 0.15);
+      border-radius: 10px;
+    }
+
+    .modal-body-section::-webkit-scrollbar-thumb:hover {
+      background: var(--verde-salvia);
+    }
+
+    /* ==========================================================================
+       SUB-MODULE DESIGNS (Historia, Wallpapers, Events, etc.)
+       ========================================================================== */
+
+    /* 1. TIMELINE (Historia) */
+    .timeline-container {
+      position: relative;
+      padding-left: 30px;
+      margin-top: 20px;
+    }
+
+    .timeline-container::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 5px;
+      bottom: 5px;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--oro-warm) 0%, var(--verde-salvia) 50%, rgba(154, 217, 91, 0.05) 100%);
+    }
+
+    .timeline-block {
+      position: relative;
+      margin-bottom: 40px;
+      transition: transform 0.3s;
+    }
+
+    .timeline-block:hover {
+      transform: translateX(5px);
+    }
+
+    .timeline-node {
+      position: absolute;
+      left: -30px;
+      top: 6px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--negro-profundo);
+      border: 2px solid var(--oro-warm);
+      box-shadow: 0 0 10px var(--oro-warm);
+      transition: all 0.3s;
+    }
+
+    .timeline-block:hover .timeline-node {
+      background: var(--verde-limon);
+      border-color: var(--verde-limon);
+      box-shadow: var(--glow-shadow);
+      transform: scale(1.2);
+    }
+
+    .timeline-year {
+      font-family: var(--font-tech);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--oro-warm);
+      margin-bottom: 8px;
+    }
+
+    .timeline-text {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--blanco-hueso);
+      opacity: 0.85;
+      font-weight: 300;
+    }
+
+    /* 2. WALLPAPERS GALLERY */
+    .wallpapers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 25px;
+    }
+
+    .wallpaper-item {
+      background: rgba(14, 54, 89, 0.25);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      transition: all 0.3s ease;
+      aspect-ratio: 9/16;
+    }
+
+    .wallpaper-item:hover {
+      border-color: var(--verde-limon);
+      transform: translateY(-5px);
+      box-shadow: var(--glow-shadow);
+    }
+
+    .wallpaper-preview-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: var(--azul-base);
+    }
+
+    .wallpaper-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(to top, rgba(5, 19, 32, 0.9) 0%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .wallpaper-name {
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--blanco-hueso);
+    }
+
+    .wallpaper-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .wallpaper-btn {
+      flex: 1;
+      padding: 6px;
+      background: rgba(242, 241, 240, 0.08);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: var(--blanco-hueso);
+      font-family: var(--font-tech);
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      text-transform: uppercase;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .wallpaper-btn:hover {
+      background: var(--verde-limon);
+      color: var(--negro-profundo);
+      border-color: var(--verde-limon);
+      font-weight: 600;
+    }
+
+    /* 3. AGENDA (Eventos) */
+    .events-filter-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .event-tab {
+      padding: 8px 18px;
+      background: rgba(242, 241, 240, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      color: var(--blanco-hueso);
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .event-tab.active,
+    .event-tab:hover {
+      background: rgba(154, 217, 91, 0.12);
+      border-color: var(--verde-limon);
+      color: var(--verde-limon);
+    }
+
+    .events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .event-card {
+      display: flex;
+      background: rgba(242, 241, 240, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      gap: 20px;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .event-card:hover {
+      border-color: rgba(217, 149, 67, 0.3);
+      background: rgba(242, 241, 240, 0.04);
+      transform: scale(1.01);
+    }
+
+    .event-date-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 70px;
+      height: 70px;
+      border-radius: 12px;
+      background: rgba(14, 54, 89, 0.5);
+      border: 1.5px solid var(--oro-warm);
+      text-align: center;
+    }
+
+    .event-day {
+      font-family: var(--font-tech);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--oro-warm);
+      line-height: 1;
+    }
+
+    .event-month {
+      font-family: var(--font-tech);
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: var(--verde-salvia);
+      margin-top: 3px;
+    }
+
+    .event-details {
+      flex: 1;
+    }
+
+    .event-type-label {
+      font-family: var(--font-tech);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: var(--verde-limon);
+      letter-spacing: 0.1em;
+      margin-bottom: 5px;
+    }
+
+    .event-card-title {
+      font-family: var(--font-main);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--blanco-hueso);
+      margin-bottom: 5px;
+    }
+
+    .event-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 0.75rem;
+      color: var(--verde-salvia);
+      opacity: 0.8;
+    }
+
+    /* 4. CIENCIA Y CULTURA */
+    .science-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+    }
+
+    .science-card {
+      background: rgba(14, 54, 89, 0.2);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .science-card:hover {
+      border-color: var(--verde-limon);
+      transform: translateY(-5px);
+      box-shadow: var(--glow-shadow);
+    }
+
+    .science-image-mock {
+      height: 150px;
+      background: var(--azul-base);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .science-image-mock canvas {
+      width: 100%;
+      height: 100%;
+      opacity: 0.6;
+    }
+
+    .science-card-icon-floater {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--negro-profundo);
+      border: 1px solid var(--verde-limon);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      bottom: -25px;
+      right: 25px;
+      box-shadow: var(--glow-shadow);
+    }
+
+    .science-card-icon-floater svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--verde-limon);
+      fill: none;
+    }
+
+    .science-content {
+      padding: 35px 25px 25px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .science-tag-pill {
+      font-family: var(--font-tech);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      color: var(--oro-warm);
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .science-title {
+      font-family: var(--font-main);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--blanco-hueso);
+      margin-bottom: 12px;
+    }
+
+    .science-desc {
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--verde-salvia);
+      margin-bottom: 15px;
+      font-weight: 300;
+    }
+
+    /* 5. REDES SOCIALES HUB */
+    .social-hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+
+    .social-hub-card {
+      background: rgba(242, 241, 240, 0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      text-decoration: none;
+      color: var(--blanco-hueso);
+      transition: all 0.3s;
+    }
+
+    .social-hub-card:hover {
+      background: rgba(14, 54, 89, 0.4);
+      transform: translateY(-5px) scale(1.03);
+    }
+
+    .social-hub-card.fb:hover { border-color: #1877F2; box-shadow: 0 0 20px rgba(24, 119, 242, 0.3); }
+    .social-hub-card.x:hover { border-color: #F2F1F0; box-shadow: 0 0 20px rgba(242, 241, 240, 0.2); }
+    .social-hub-card.ig:hover { border-color: #E1306C; box-shadow: 0 0 20px rgba(225, 48, 108, 0.3); }
+    .social-hub-card.yt:hover { border-color: #FF0000; box-shadow: 0 0 20px rgba(255, 0, 0, 0.3); }
+    .social-hub-card.tk:hover { border-color: #00f2fe; box-shadow: 0 0 20px rgba(0, 242, 254, 0.3); }
+
+    .social-icon-wrapper {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(242, 241, 240, 0.04);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .social-icon-wrapper svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--blanco-hueso);
+    }
+
+    .social-hub-name {
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* 6. RECURSOS Y QR */
+    .resources-wrapper {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .resources-details {
+      flex: 1;
+      min-width: 250px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .resources-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--verde-salvia);
+      font-weight: 300;
+    }
+
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      background: rgba(242, 241, 240, 0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 25px;
+      min-width: 240px;
+      text-align: center;
+    }
+
+    .qr-mock-box {
+      width: 160px;
+      height: 160px;
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .qr-mock-box svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .qr-label {
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      color: var(--oro-warm);
+      text-transform: uppercase;
+    }
+
+    .resources-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .resource-link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: rgba(242, 241, 240, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--blanco-hueso);
+      text-decoration: none;
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: all 0.3s;
+    }
+
+    .resource-link-btn:hover {
+      background: rgba(14, 54, 89, 0.40);
+      border-color: var(--verde-limon);
+      transform: translateX(4px);
+    }
+
+    .resource-link-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--verde-limon);
+      fill: none;
+    }
+
+    /* ==========================================================================
+       MOST IMPORTANT: CREATIVE STUDIO (Generador de Postales UNAM475)
+       ========================================================================== */
+    .studio-panel {
+      display: flex;
+      gap: 30px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Left Side: Canvas Preview & Direct Actions */
+    .studio-canvas-column {
+      flex: 1.1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      min-width: 0;
+    }
+
+    .studio-canvas-outer {
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 1/1;
+      background: #040d16;
+      border: 1.5px solid var(--glass-border);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .studio-canvas-outer::before {
+      content: 'Cargando Lienzo...';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      color: var(--verde-salvia);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    #studio-canvas {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 5;
+    }
+
+    /* Dragging Overlay Guide */
+    .studio-canvas-instructions {
+      font-family: var(--font-tech);
+      font-size: 0.65rem;
+      color: var(--verde-salvia);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      text-align: center;
+    }
+
+    .quick-action-bar {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .quick-action-btn {
+      flex: 1;
+      padding: 10px;
+      background: rgba(242, 241, 240, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: var(--blanco-hueso);
+      font-family: var(--font-tech);
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .quick-action-btn:hover {
+      background: rgba(14, 54, 89, 0.5);
+      border-color: var(--oro-warm);
+      color: var(--oro-warm);
+    }
+
+    .quick-action-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    /* Right Side: Tools Customization Menu */
+    .studio-controls-column {
+      flex: 0.9;
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--glass-border);
+      padding-left: 30px;
+      overflow-y: auto;
+      min-width: 280px;
+    }
+
+    /* Accordion Tabs Styling */
+    .control-tab-wrapper {
+      margin-bottom: 12px;
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(242, 241, 240, 0.02);
+      transition: border-color 0.3s;
+    }
+
+    .control-tab-wrapper.active {
+      border-color: rgba(154, 217, 91, 0.3);
+    }
+
+    .control-tab-header {
+      width: 100%;
+      padding: 14px 20px;
+      background: none;
+      border: none;
+      color: var(--blanco-hueso);
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.3s;
+    }
+
+    .control-tab-header:hover {
+      background: rgba(242, 241, 240, 0.03);
+    }
+
+    .control-tab-header svg {
+      width: 12px;
+      height: 12px;
+      stroke: var(--verde-salvia);
+      transition: transform 0.3s;
+    }
+
+    .control-tab-wrapper.active .control-tab-header svg {
+      transform: rotate(180deg);
+      stroke: var(--verde-limon);
+    }
+
+    .control-tab-content {
+      padding: 0 20px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), padding 0.4s;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .control-tab-wrapper.active .control-tab-content {
+      max-height: 400px;
+      padding: 15px 20px 20px;
+      overflow-y: auto;
+    }
+
+    /* Accordion Scrollbar */
+    .control-tab-content::-webkit-scrollbar {
+      width: 4px;
+    }
+    .control-tab-content::-webkit-scrollbar-thumb {
+      background: rgba(242, 241, 240, 0.1);
+      border-radius: 2px;
+    }
+
+    /* Custom Input fields inside Studio controls */
+    .studio-label {
+      font-family: var(--font-tech);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--verde-salvia);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .studio-text-input {
+      width: 100%;
+      background: rgba(242, 241, 240, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--blanco-hueso);
+      font-family: var(--font-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .studio-text-input:focus {
+      border-color: var(--verde-limon);
+    }
+
+    /* Grid layout selectors (Frames, backgrounds, filters, stickers) */
+    .gallery-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .gallery-option {
+      background: rgba(242, 241, 240, 0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 10px 5px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-size: 0.65rem;
+      font-family: var(--font-tech);
+      text-transform: uppercase;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .gallery-option.active,
+    .gallery-option:hover {
+      background: rgba(154, 217, 91, 0.08);
+      border-color: var(--verde-limon);
+      color: var(--verde-limon);
+    }
+
+    .gallery-option-preview {
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(242, 241, 240, 0.08);
+    }
+
+    .gallery-option-preview svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Slider styling */
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .studio-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(242, 241, 240, 0.15);
+      outline: none;
+    }
+
+    .studio-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--verde-limon);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .studio-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .slider-value {
+      font-family: var(--font-tech);
+      font-size: 0.7rem;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    /* Toggle switches */
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(242, 241, 240, 0.15);
+      transition: .3s;
+      border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--blanco-hueso);
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background-color: var(--verde-limon);
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+      background-color: var(--negro-profundo);
+    }
+
+    /* Download/Share Actions */
+    .studio-global-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .studio-action-btn {
+      flex: 1;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-family: var(--font-tech);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .studio-action-btn.secondary {
+      background: rgba(242, 241, 240, 0.05);
+      border: 1px solid var(--glass-border);
+      color: var(--blanco-hueso);
+    }
+
+    .studio-action-btn.secondary:hover {
+      background: rgba(242, 241, 240, 0.08);
+      border-color: var(--oro-warm);
+      color: var(--oro-warm);
+    }
+
+    .studio-action-btn.primary {
+      background: linear-gradient(135deg, var(--verde-limon) 0%, var(--verde-salvia) 100%);
+      border: none;
+      color: var(--negro-profundo);
+      font-weight: 600;
+      box-shadow: var(--glow-shadow);
+    }
+
+    .studio-action-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(154, 217, 91, 0.5);
+    }
+
+    .studio-action-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    /* Live Video container (Hidden) */
+    #hidden-video {
+      display: none;
+    }
+
+    /* Camera overlay overlay warning */
+    .camera-toast-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(5, 19, 32, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .camera-toast-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .camera-toast-title {
+      font-family: var(--font-tech);
+      font-size: 0.95rem;
+      color: var(--oro-warm);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .camera-toast-desc {
+      font-size: 0.8rem;
+      color: var(--verde-salvia);
+      max-width: 300px;
+      line-height: 1.4;
+    }
+
+    /* Selection feedback toast */
+    .action-toast {
+      position: fixed;
+      bottom: 120px;
+      left: 50%;
+      transform: translate(-50%, 50px);
+      background: rgba(14, 54, 89, 0.9);
+      border: 1px solid var(--verde-limon);
+      border-radius: 30px;
+      padding: 10px 24px;
+      font-family: var(--font-tech);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--verde-limon);
+      letter-spacing: 0.1em;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 10000;
+      pointer-events: none;
+      box-shadow: var(--glow-shadow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-toast.active {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       ANIMATIONS KEYFRAMES
+       ========================================================================== */
+    @keyframes floatMotion {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-6px); }
+    }
+
+    @keyframes dockFloat {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-4px) scale(1.005); }
+    }
+
+    @keyframes pulseGold {
+      0% { box-shadow: 0 0 15px rgba(217, 149, 67, 0.2); }
+      100% { box-shadow: 0 0 30px rgba(217, 149, 67, 0.5), 0 0 10px rgba(154, 217, 91, 0.2); }
+    }
+
+    .app-footer {
+      width: 100%;
+      text-align: center;
+      font-family: var(--font-tech);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--verde-salvia);
+      opacity: 0.6;
+      margin-top: 10px;
+      text-transform: uppercase;
+      z-index: 20;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE & MOBILE OPTIMIZATIONS
+       ========================================================================== */
+    @media (max-width: 900px) {
+      .app-container {
+        padding: 2vh 15px;
+      }
+
+      .center-panel {
+        transform: translate3d(0, -1vh, 0);
+      }
+
+      .center-display-475 svg {
+        width: 200px;
+      }
+
+      .concept-title {
+        margin-bottom: 10px;
+      }
+
+      .dock-container {
+        padding: 8px 12px;
+        border-radius: 30px;
+      }
+
+      .dock-item {
+        padding: 5px 8px;
+        gap: 4px;
+      }
+
+      .dock-icon-circle {
+        width: 38px;
+        height: 38px;
+      }
+
+      .dock-icon-circle svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .dock-label {
+        font-size: 0.55rem;
+        display: none; /* Hide text label on super tight layouts, rely on clean icons & interactive tooltips */
+      }
+
+      .dock-item.special-node {
+        transform: translateY(-8px);
+      }
+      
+      .dock-item.special-node .dock-icon-circle {
+        width: 46px;
+        height: 46px;
+      }
+
+      .dock-item.special-node .dock-icon-circle svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .modal-overlay {
+        padding: 15px;
+      }
+
+      .modal-pane {
+        max-height: 90vh;
+        border-radius: 20px;
+      }
+
+      .modal-header-section {
+        padding: 25px 25px 10px;
+      }
+
+      .modal-body-section {
+        padding: 10px 25px 25px;
+      }
+
+      /* Studio panel stacks vertically on mobile */
+      .studio-panel {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .studio-controls-column {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid var(--glass-border);
+        padding-top: 15px;
+        min-width: 0;
+      }
+
+      .studio-canvas-outer {
+        max-width: 280px;
+      }
+      
+      .quick-action-bar {
+        max-width: 280px;
+      }
+
+      .resources-wrapper {
+        flex-direction: column-reverse;
+        gap: 20px;
+      }
+
+      .qr-container {
+        width: 100%;
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .center-display-475 svg {
+        width: 160px;
+      }
+
+      .portal-action-btn {
+        padding: 12px 30px;
+        font-size: 0.8rem;
+      }
+
+      .dock-container {
+        border-radius: 25px;
+      }
+
+      .dock-icon-circle {
+        width: 32px;
+        height: 32px;
+      }
+
+      .dock-icon-circle svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .dock-item.special-node .dock-icon-circle {
+        width: 38px;
+        height: 38px;
+      }
+
+      .dock-item.special-node .dock-icon-circle svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .modal-close-btn {
+        top: 15px;
+        right: 15px;
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- AMBIENT NEBULAS / BLURS -->
+  <div class="ambient-aurora" id="aurora-1"></div>
+  <div class="ambient-aurora" id="aurora-2"></div>
+  <div class="ambient-aurora" id="aurora-3"></div>
+
+  <!-- PARTICLES CANVAS (Cinematic Visual Base) -->
+  <canvas id="background-canvas"></canvas>
+
+  <!-- HOLOGRAPHIC CURSOR -->
+  <div class="custom-cursor" id="cursor-core"></div>
+  <div class="custom-cursor-glow" id="cursor-glow"></div>
+
+  <!-- TOAST FEEDBACK SYSTEM -->
+  <div class="action-toast" id="system-toast">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toast-message">Copiado con éxito</span>
+  </div>
+
+  <!-- FULLSCREEN CORE VIEW -->
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header>
+      <div class="header-logo clickable">
+        <img src="https://posgrado.unam.mx/trabajosocial/wp-content/uploads/2021/05/logo-unam-png-blanco-ok.png" class="navbar-logo unam-logo" alt="UNAM Logo">
+        <img src="https://i.ibb.co/yBMBwJqJ/SDI-LOGO-1.png" class="navbar-logo sdi-logo" alt="SDI Logo">
+      </div>
+      
+      <!-- Quick Redirection for captive portal liberation -->
+      <a href="https://475.unam.mx" target="_blank" class="header-cta-button clickable">
+        <span>Portal Oficial</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></polyline><polyline points="12 5 19 12 12 19"></polyline></svg>
+      </a>
+    </header>
+
+    <!-- CENTER GRAPHIC STAGE -->
+    <div class="center-panel">
+      <div class="center-badge">CIENCIA • CULTURA • AUTONOMÍA</div>
+      <div class="center-display-475">
+        <img src="https://historicas.unam.mx/sites/default/themes/lorem/images/logotipo-unam-475.png" alt="Logotipo UNAM 475">
+      </div>
+      
+      <h2 class="concept-title">475 años de concebir futuros</h2>
+
+      <!-- PHRASE SLIDER -->
+      <div class="phrase-slider">
+        <div class="phrase-track" id="phraseTrack">
+          <!-- Dynamically populated from JS -->
+        </div>
+      </div>
+
+      <!-- MAIN GATEWAY BUTTON -->
+      <a href="https://475.unam.mx" class="portal-action-btn clickable" id="portalMainBtn">
+        <span>Conectarse al Portal</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20" stroke-linecap="round" stroke-width="3"></line></svg>
+      </a>
+    </div>
+
+    <!-- BOTTOM INTERACTIVE CONTROL DOCK -->
+    <div class="dock-container">
+      
+      <button class="dock-item clickable" onclick="openModal('history')">
+        <div class="dock-icon-circle">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <span class="dock-label">Historia</span>
+      </button>
+
+      <button class="dock-item clickable" onclick="openModal('wallpapers')">
+        <div class="dock-icon-circle">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        </div>
+        <span class="dock-label">Fondos</span>
+      </button>
+
+      <button class="dock-item clickable" onclick="openModal('events')">
+        <div class="dock-icon-circle">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+        <span class="dock-label">Eventos</span>
+      </button>
+
+      <!-- EXTREMELY SPECIAL CREATIVE STUDIO BUTTON -->
+      <button class="dock-item special-node clickable" onclick="openModal('studio')">
+        <div class="dock-icon-circle">
+          <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+        </div>
+        <span class="dock-label">Estudio Postal</span>
+      </button>
+
+      <button class="dock-item clickable" onclick="openModal('science')">
+        <div class="dock-icon-circle">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"></line><circle cx="18" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M18 9a9 9 0 0 1-9 9"></path></svg>
+        </div>
+        <span class="dock-label">Ciencia</span>
+      </button>
+
+      <button class="dock-item clickable" onclick="openModal('social')">
+        <div class="dock-icon-circle">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+        </div>
+        <span class="dock-label">Redes</span>
+      </button>
+
+      <button class="dock-item clickable" onclick="openModal('resources')">
+        <div class="dock-icon-circle">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        </div>
+        <span class="dock-label">Recursos</span>
+      </button>
+
+    </div>
+
+    <footer class="app-footer">
+      © 2026 Secretaría de Desarrollo Institucional — UNAM
+    </footer>
+
+  </div>
+
+  <!-- ==========================================================================
+       MODALS ROOT CONTAINER
+       ========================================================================== -->
+  
+  <!-- 1. MODAL: HISTORIA (Timeline) -->
+  <div class="modal-overlay" id="modal-history">
+    <div class="modal-pane">
+      <div class="modal-laser-bar"></div>
+      <button class="modal-close-btn clickable" onclick="closeActiveModal()">✕</button>
+      <div class="modal-header-section">
+        <div class="modal-tag">Legado y Excelencia</div>
+        <h3 class="modal-title-text">Línea del Tiempo UNAM</h3>
+      </div>
+      <div class="modal-body-section">
+        <div class="timeline-container" id="timelineContainer">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MODAL: WALLPAPERS -->
+  <div class="modal-overlay" id="modal-wallpapers">
+    <div class="modal-pane">
+      <div class="modal-laser-bar"></div>
+      <button class="modal-close-btn clickable" onclick="closeActiveModal()">✕</button>
+      <div class="modal-header-section">
+        <div class="modal-tag">Diseño Digital Conmemorativo</div>
+        <h3 class="modal-title-text">Wallpapers 475 Aniversario</h3>
+      </div>
+      <div class="modal-body-section">
+        <div class="wallpapers-grid" id="wallpapersGrid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MODAL: EVENTOS (Agenda) -->
+  <div class="modal-overlay" id="modal-events">
+    <div class="modal-pane">
+      <div class="modal-laser-bar"></div>
+      <button class="modal-close-btn clickable" onclick="closeActiveModal()">✕</button>
+      <div class="modal-header-section">
+        <div class="modal-tag">Agenda Oficial del Aniversario</div>
+        <h3 class="modal-title-text">Eventos y Actividades</h3>
+        <div class="events-filter-tabs" id="eventsTabs">
+          <!-- Tabs populated via JS -->
+        </div>
+      </div>
+      <div class="modal-body-section">
+        <div class="events-list" id="eventsList">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MODAL: CIENCIA Y CULTURA -->
+  <div class="modal-overlay" id="modal-science">
+    <div class="modal-pane">
+      <div class="modal-laser-bar"></div>
+      <button class="modal-close-btn clickable" onclick="closeActiveModal()">✕</button>
+      <div class="modal-header-section">
+        <div class="modal-tag">Innovación y Vanguardia Científica</div>
+        <h3 class="modal-title-text">Orgullo en Ciencia y Cultura</h3>
+      </div>
+      <div class="modal-body-section">
+        <div class="science-grid" id="scienceGrid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. MODAL: REDES SOCIALES -->
+  <div class="modal-overlay" id="modal-social">
+    <div class="modal-pane">
+      <div class="modal-laser-bar"></div>
+      <button class="modal-close-btn clickable" onclick="closeActiveModal()">✕</button>
+      <div class="modal-header-section">
+        <div class="modal-tag">Comunidad en Línea</div>
+        <h3 class="modal-title-text">Redes Sociales Oficiales</h3>
+      </div>
+      <div class="modal-body-section">
+        <div class="social-hub-grid" id="socialHubGrid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. MODAL: RECURSOS Y QR -->
+  <div class="modal-overlay" id="modal-resources">
+    <div class="modal-pane">
+      <div class="modal-laser-bar"></div>
+      <button class="modal-close-btn clickable" onclick="closeActiveModal()">✕</button>
+      <div class="modal-header-section">
+        <div class="modal-tag">Materiales de Identidad y Acceso</div>
+        <h3 class="modal-title-text">Recursos Universitarios</h3>
+      </div>
+      <div class="modal-body-section">
+        <div class="resources-wrapper">
+          <div class="resources-details">
+            <p class="resources-desc">
+              Descarga los logotipos vectoriales de los 475 años de la UNAM, manuales de uso gráfico e información técnica. Si estás conectándote desde una infraestructura Cisco Systems o Aruba Networks, utiliza este portal para autorizar otros dispositivos alternos de manera inmediata.
+            </p>
+            <div class="resources-links" id="resourcesLinks">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+          <div class="qr-container">
+            <span class="qr-label">Escanea para Compartir WiFi</span>
+            <div class="qr-mock-box">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <!-- Simple Vector Mock QR Code for premium aesthetics -->
+                <rect x="0" y="0" width="25" height="25" fill="#0E3659"/>
+                <rect x="5" y="5" width="15" height="15" fill="white"/>
+                <rect x="75" y="0" width="25" height="25" fill="#0E3659"/>
+                <rect x="80" y="5" width="15" height="15" fill="white"/>
+                <rect x="0" y="75" width="25" height="25" fill="#0E3659"/>
+                <rect x="5" y="80" width="15" height="15" fill="white"/>
+                <!-- Randomized blocks -->
+                <rect x="35" y="10" width="10" height="25" fill="#0E3659"/>
+                <rect x="55" y="5" width="15" height="10" fill="#0E3659"/>
+                <rect x="15" y="40" width="30" height="10" fill="#0E3659"/>
+                <rect x="10" y="60" width="15" height="10" fill="#0E3659"/>
+                <rect x="35" y="65" width="20" height="20" fill="#0E3659"/>
+                <rect x="65" y="45" width="20" height="30" fill="#0E3659"/>
+                <rect x="60" y="30" width="10" height="10" fill="#0E3659"/>
+                <rect x="85" y="85" width="15" height="15" fill="#9AD95B"/> <!-- Green special corner block -->
+              </svg>
+            </div>
+            <span style="font-size: 0.7rem; opacity: 0.8;">SSID: UNAM_475_CONECTA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. MODAL: SPECIAL CREATIVE STUDIO (Generador de Postales UNAM475) -->
+  <div class="modal-overlay" id="modal-studio">
+    <div class="modal-pane" style="max-width: 950px;">
+      <div class="modal-laser-bar"></div>
+      <button class="modal-close-btn clickable" id="studio-close-btn" onclick="closeActiveModal()">✕</button>
+      <div class="modal-header-section">
+        <div class="modal-tag">Estudio Creativo Digital</div>
+        <h3 class="modal-title-text">Generador de Postales Conmemorativas</h3>
+      </div>
+      <div class="modal-body-section">
+        
+        <div class="studio-panel">
+          
+          <!-- LEFT: CANVAS PANEL -->
+          <div class="studio-canvas-column">
+            <div class="studio-canvas-outer" id="canvasOuterWrapper">
+              <!-- Interactive Workspace Canvas -->
+              <canvas id="studio-canvas"></canvas>
+
+              <!-- Live camera active video element (hidden, used as source) -->
+              <video id="hidden-video" autoplay playsinline></video>
+
+              <!-- Loading / Permission camera screen overlay -->
+              <div class="camera-toast-overlay" id="cameraOverlay">
+                <span class="camera-toast-title">Accediendo a Cámara</span>
+                <span class="camera-toast-desc">Por favor otorga permisos de cámara en tu navegador para ver la transmisión interactiva en vivo.</span>
+                <button class="quick-action-btn clickable" style="max-width: 150px;" onclick="cancelCamera()">Cancelar</button>
+              </div>
+            </div>
+
+            <div class="studio-canvas-instructions">
+              Arrastra tu imagen para moverla. Usa la rueda del mouse para escalar.
+            </div>
+
+            <div class="quick-action-bar">
+              <!-- Upload Image -->
+              <button class="quick-action-btn clickable" id="fileUploadMockBtn">
+                <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>Subir Foto</span>
+              </button>
+              <input type="file" id="realFileInput" accept="image/*" style="display: none;">
+
+              <!-- Toggle Camera stream -->
+              <button class="quick-action-btn clickable" id="cameraToggleBtn">
+                <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <span id="cameraBtnText">Usar Cámara</span>
+              </button>
+
+              <!-- Take Picture Snapshot (Visible only when camera live) -->
+              <button class="quick-action-btn clickable" id="snapshotBtn" style="display: none; background: rgba(154, 217, 91, 0.2); border-color: var(--verde-limon);">
+                <svg viewBox="0 0 24 24" stroke-width="1.8" stroke="var(--verde-limon)"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+                <span style="color: var(--verde-limon);">Capturar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT: CONTROLS SIDEBAR -->
+          <div class="studio-controls-column">
+            
+            <!-- ACCORDION 1: FONDO INSTITUCIONAL -->
+            <div class="control-tab-wrapper active" id="tab-bg">
+              <button class="control-tab-header clickable" onclick="toggleAccordion('tab-bg')">
+                <span>1. Fondo Institucional</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="control-tab-content">
+                <span class="studio-label">Elige la base del diseño:</span>
+                <div class="gallery-selector" id="bgSelector">
+                  <!-- Populated from JS config -->
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCORDION 2: CONTROLES DE IMAGEN (Zoom/Rotación) -->
+            <div class="control-tab-wrapper" id="tab-adjust">
+              <button class="control-tab-header clickable" onclick="toggleAccordion('tab-adjust')">
+                <span>2. Ajuste de Foto</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="control-tab-content">
+                
+                <div class="slider-group">
+                  <span class="studio-label">Escala / Zoom</span>
+                  <div class="slider-row">
+                    <input type="range" class="studio-slider clickable" id="scaleSlider" min="0.1" max="3" step="0.05" value="1">
+                    <span class="slider-value" id="scaleVal">1.0x</span>
+                  </div>
+                </div>
+
+                <div class="slider-group">
+                  <span class="studio-label">Rotación</span>
+                  <div class="slider-row">
+                    <input type="range" class="studio-slider clickable" id="rotateSlider" min="-180" max="180" step="1" value="0">
+                    <span class="slider-value" id="rotateVal">0°</span>
+                  </div>
+                </div>
+
+                <button class="quick-action-btn clickable" style="width: 100%; margin-top: 5px;" onclick="resetImageTransform()">
+                  Reajustar Centrado
+                </button>
+                
+              </div>
+            </div>
+
+            <!-- ACCORDION 3: FILTROS VISUALES -->
+            <div class="control-tab-wrapper" id="tab-filters">
+              <button class="control-tab-header clickable" onclick="toggleAccordion('tab-filters')">
+                <span>3. Filtros Artísticos</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="control-tab-content">
+                <div class="gallery-selector" id="filtersSelector">
+                  <!-- Populated dynamically via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCORDION 4: MARCOS CONMEMORATIVOS -->
+            <div class="control-tab-wrapper" id="tab-frames">
+              <button class="control-tab-header clickable" onclick="toggleAccordion('tab-frames')">
+                <span>4. Marco UNAM475</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="control-tab-content">
+                <div class="gallery-selector" id="framesSelector">
+                  <!-- Populated from JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCORDION 5: STICKERS TEMÁTICOS -->
+            <div class="control-tab-wrapper" id="tab-stickers">
+              <button class="control-tab-header clickable" onclick="toggleAccordion('tab-stickers')">
+                <span>5. Stickers Especiales</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="control-tab-content">
+                <span class="studio-label">Haz clic para agregar al lienzo:</span>
+                <div class="gallery-selector" id="stickersSelector">
+                  <!-- Populated from JS -->
+                </div>
+                
+                <!-- Extra controls if a sticker is selected -->
+                <div id="selected-sticker-controls" style="display: none; border-top: 1px solid var(--glass-border); padding-top: 12px; margin-top: 5px;">
+                  <span class="studio-label" style="color: var(--oro-warm);">Ajuste de Sticker Activo:</span>
+                  <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button class="quick-action-btn clickable" onclick="transformActiveSticker('scale', -0.05)">- Tamaño</button>
+                    <button class="quick-action-btn clickable" onclick="transformActiveSticker('scale', 0.05)">+ Tamaño</button>
+                    <button class="quick-action-btn clickable" onclick="transformActiveSticker('rotate', -15)">↺ Rotar</button>
+                    <button class="quick-action-btn clickable" onclick="transformActiveSticker('rotate', 15)">↻ Rotar</button>
+                  </div>
+                  <button class="quick-action-btn clickable" style="width: 100%; margin-top: 10px; background: rgba(255,0,0,0.15); border-color: rgba(255,0,0,0.3); color: #FFAAAA;" onclick="deleteActiveSticker()">
+                    Eliminar Sticker
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACCORDION 6: TEXTO PERSONALIZADO -->
+            <div class="control-tab-wrapper" id="tab-text">
+              <button class="control-tab-header clickable" onclick="toggleAccordion('tab-text')">
+                <span>6. Firma / Texto</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </button>
+              <div class="control-tab-content">
+                
+                <div class="slider-group">
+                  <span class="studio-label">Escribe tu texto conmemorativo</span>
+                  <input type="text" class="studio-text-input" id="customTextInput" placeholder="Ej: Orgullo de Ingeniería" maxlength="40">
+                </div>
+
+                <div class="slider-group">
+                  <span class="studio-label">Color de la Letra</span>
+                  <div class="gallery-selector" id="textColorSelector">
+                    <!-- Configured via JS -->
+                  </div>
+                </div>
+
+                <div class="toggle-row">
+                  <span class="studio-label">Efecto Resplandor (Glow)</span>
+                  <label class="toggle-switch clickable">
+                    <input type="checkbox" id="textGlowToggle">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                
+              </div>
+            </div>
+
+            <!-- GLOBAL OUTPUT EXPORT ACTIONS -->
+            <div class="studio-global-actions">
+              <!-- Share -->
+              <button class="studio-action-btn secondary clickable" onclick="shareStudioPostal()">
+                <svg viewBox="0 0 24 24" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <span>Compartir</span>
+              </button>
+
+              <!-- Download PNG -->
+              <button class="studio-action-btn primary clickable" onclick="downloadStudioPostal()">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <span>Descargar</span>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       VANILLA JAVASCRIPT CONFIGURATION & ENGINES
+       ========================================================================== -->
+  <script>
+    /* ==========================================================================
+       1. DATA STRUCTURES (Arrays de configuración para fácil edición administrativa)
+       ========================================================================== */
+
+    const FRASES_CENTRALES = [
+      "475 años de concebir futuros",
+      "475 años imaginando el futuro",
+      "475 años de ciencia e investigación",
+      "475 años de cultura y autonomía viva",
+      "475 años transformando a México"
+    ];
+
+    const HITOS_HISTORIA = [
+      { year: "1551", text: "Fundación de la Real y Pontificia Universidad de México, antecedente primordial de nuestra máxima casa de estudios." },
+      { year: "1910", text: "Justo Sierra promueve la creación de la Universidad Nacional de México, consolidando el proyecto educativo nacional." },
+      { year: "1929", text: "Se conquista la Autonomía Universitaria. Nace la UNAM como un espacio libre e independiente de cátedra y pensamiento." },
+      { year: "1954", text: "Se inaugura el campus central de Ciudad Universitaria (CU), integrando la ciencia con el arte de Rivera, Siqueiros y O'Gorman." },
+      { year: "1985", text: "Egresados distinguidos y científicos de la UNAM lideran el desarrollo nacional; Alfonso García Robles recibe el Premio Nobel de la Paz." },
+      { year: "1995", text: "Mario Molina, egresado de la Facultad de Química, recibe el Premio Nobel de Química por sus trascendentales estudios de la capa de ozono." },
+      { year: "2007", text: "El Campus Central de Ciudad Universitaria es declarado Patrimonio de la Humanidad por la UNESCO por su valor excepcional universal." },
+      { year: "2026", text: "Celebramos 475 años liderando el conocimiento, la innovación y concibiendo el futuro tecnológico y social de México." }
+    ];
+
+    const WALLPAPERS_DATA = [
+      { id: "futuro", name: "Concebir Futuros", style: "hologram" },
+      { id: "biblioteca", name: "Biblioteca Central", style: "library" },
+      { id: "sculpture", name: "Espacio Escultórico", style: "sculpture" },
+      { id: "gold", name: "Legado de Oro", style: "gold" },
+      { id: "puma", name: "Puma Cibernético", style: "cyber-puma" }
+    ];
+
+    const EVENTOS_DATA = [
+      { date: "25 MAY", title: "Magno Concierto de Gala de la OFUNM", category: "Cultura", place: "Sala Nezahualcóyotl, CU", time: "18:00 hrs" },
+      { date: "03 JUN", title: "Hackathon de Innovación Tecnológica 'UNAM 475'", category: "Ciencia", place: "Anexo de Ingeniería, CU", time: "09:00 hrs" },
+      { date: "15 JUN", title: "Mesa Redonda: Autonomía Universitaria en el Siglo XXI", category: "Academia", place: "Auditorio Alfonso Caso, CU", time: "12:00 hrs" },
+      { date: "22 JUN", title: "Exposición Colectiva 'Muralismo Digital e Inteligencia'", category: "Cultura", place: "MUAC, CU", time: "11:00 hrs" },
+      { date: "10 JUL", title: "Maratón Nocturno Universitario '475 Años'", category: "Deportes", place: "Estadio Olímpico Universitario", time: "20:00 hrs" },
+      { date: "18 AGO", title: "Congreso Internacional de Inteligencia Artificial y Ciencia", category: "Ciencia", place: "Centro de Ciencias de la Complejidad", time: "10:00 hrs" }
+    ];
+
+    const CIENCIA_DATA = [
+      {
+        tag: "Exploración Cósmica",
+        title: "Observatorio San Pedro Mártir",
+        desc: "Líder en astrofísica, albergando telescopios de alta tecnología y proyectos de vanguardia en colaboración internacional.",
+        style: "stars"
+      },
+      {
+        tag: "Tecnología Aeroespacial",
+        title: "Nanosatélites UNAM K'OTO",
+        desc: "Desarrollo completo de tecnología satelital autónoma mexicana diseñada por investigadores y alumnos universitarios.",
+        style: "cyber"
+      },
+      {
+        tag: "Patrimonio de la Humanidad",
+        title: "Murales Monumentales de CU",
+        desc: "Sinfonía plástica de piedra y mosaico que corona la Biblioteca y Rectoría, fundiendo historia, cultura y futuro.",
+        style: "art"
+      },
+      {
+        tag: "Compromiso Sustentable",
+        title: "Complejo Ecológico de la Reserva",
+        desc: "Preservación activa del ecosistema único del Pedregal, coordinando ciencia y conciencia ecológica nacional.",
+        style: "nature"
+      }
+    ];
+
+    const REDES_DATA = [
+      { id: "fb", name: "Facebook", link: "https://www.facebook.com/UNAM.MX.Oficial", svg: '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>' },
+      { id: "x", name: "X / Twitter", link: "https://twitter.com/UNAM_MX", svg: '<path d="M4 4l11.733 16h4.267l-11.733 -16z M4 20l6.768 -6.768 M20 4l-6.768 6.768"/>' },
+      { id: "ig", name: "Instagram", link: "https://www.instagram.com/unam_mx/", svg: '<rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>' },
+      { id: "yt", name: "YouTube", link: "https://www.youtube.com/user/unam", svg: '<path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>' },
+      { id: "tk", name: "TikTok", link: "https://www.tiktok.com/@unam_mx", svg: '<path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path>' }
+    ];
+
+    const RECURSOS_DATA = [
+      { name: "Cresta Vectorial Conmemorativa", format: "SVG / EPS", link: "https://475.unam.mx" },
+      { name: "Manual de Identidad UNAM 475", format: "PDF (5 MB)", link: "https://475.unam.mx" },
+      { name: "Kit de Prensa y Material Gráfico", format: "ZIP (45 MB)", link: "https://475.unam.mx" }
+    ];
+
+    const FONDOS_POSTAL = [
+      { id: "grad-holo", name: "Holograma", type: "gradient", colors: ["#0E3659", "#9AD95B"] },
+      { id: "grad-gold", name: "Prestigio", type: "gradient", colors: ["#0E3659", "#D99543"] },
+      { id: "cu-vector", name: "Piedra CU", type: "volcanic" },
+      { id: "grid-space", name: "Ciencia", type: "grid" }
+    ];
+
+    const MARCOS_POSTAL = [
+      { id: "frame-none", name: "Sin Marco" },
+      { id: "frame-classic", name: "Oro Clásico" },
+      { id: "frame-scifi", name: "Cibernético" },
+      { id: "frame-puma", name: "Orgullo Puma" }
+    ];
+
+    const STICKERS_POSTAL = [
+      { id: "st-crest", name: "Escudo", type: "crest" },
+      { id: "st-puma", name: "Puma", type: "puma" },
+      { id: "st-475", name: "Logo 475", type: "number475" },
+      { id: "st-goya", name: "¡Goya!", type: "goya" },
+      { id: "st-atom", name: "Ciencia", type: "atom" }
+    ];
+
+    const FILTROS_POSTAL = [
+      { id: "none", name: "Normal", filter: "none" },
+      { id: "grayscale", name: "B&N", filter: "grayscale(1) contrast(1.1)" },
+      { id: "sepia", name: "Histórico", filter: "sepia(0.85) contrast(1.05)" },
+      { id: "warm", name: "Oro Warm", filter: "sepia(0.3) saturate(1.4) hue-rotate(-10deg)" },
+      { id: "holo", name: "Holográfico", filter: "contrast(1.2) saturate(1.8) hue-rotate(90deg)" }
+    ];
+
+    const TEXT_COLORS = [
+      { hex: "#F2F1F0", name: "Blanco" },
+      { hex: "#D99543", name: "Dorado" },
+      { hex: "#9AD95B", name: "Verde" },
+      { hex: "#0E3659", name: "Azul" }
+    ];
+
+
+    /* ==========================================================================
+       2. CINEMATIC PARTICLES ENGINE (Canvas de fondo)
+       ========================================================================== */
+    (function initBackgroundParticles() {
+      const canvas = document.getElementById('background-canvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      class Particle {
+        constructor() {
+          this.reset();
+        }
+
+        reset() {
+          this.x = Math.random() * width;
+          this.y = Math.random() * height;
+          this.size = Math.random() * 2.2 + 0.4;
+          this.speedX = (Math.random() - 0.5) * 0.25;
+          this.speedY = (Math.random() - 0.5) * 0.15 - 0.1; // Slow upwards drift
+          this.opacity = Math.random() * 0.45 + 0.1;
+          this.color = Math.random() > 0.65 ? '#D99543' : (Math.random() > 0.5 ? '#9AD95B' : '#B4D98F');
+          this.life = Math.random() * 200 + 100;
+          this.maxLife = this.life;
+        }
+
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          this.life--;
+
+          if (this.life <= 0 || this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+            this.reset();
+          }
+        }
+
+        draw() {
+          const ratio = this.life / this.maxLife;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.globalAlpha = this.opacity * ratio;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      // Initialize pool
+      const count = Math.min(65, Math.floor((width * height) / 18000));
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Render soft connections
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].update();
+          particles[i].draw();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 110) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = particles[i].color;
+              ctx.globalAlpha = (1 - dist / 110) * 0.07;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+              ctx.globalAlpha = 1;
+            }
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+
+    /* ==========================================================================
+       3. HOLOGRAPHIC CURSOR INTERACTIVE TRACKING
+       ========================================================================== */
+    (function initHolographicCursor() {
+      const cursor = document.getElementById('cursor-core');
+      const glow = document.getElementById('cursor-glow');
+      
+      let cursorX = 0, cursorY = 0;
+      let targetX = 0, targetY = 0;
+
+      // Track exact pointer
+      document.addEventListener('mousemove', (e) => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        cursor.style.left = targetX + 'px';
+        cursor.style.top = targetY + 'px';
+      });
+
+      // Lerp tracking for glowing outer circle (gives dynamic holographic trailing feel)
+      function updateGlowPosition() {
+        const dx = targetX - cursorX;
+        const dy = targetY - cursorY;
+        cursorX += dx * 0.15; // interpolation velocity
+        cursorY += dy * 0.15;
+        
+        glow.style.left = cursorX + 'px';
+        glow.style.top = cursorY + 'px';
+        
+        requestAnimationFrame(updateGlowPosition);
+      }
+      updateGlowPosition();
+
+      // Click burst particles
+      document.addEventListener('mousedown', () => {
+        document.body.classList.add('cursor-active');
+      });
+      document.addEventListener('mouseup', () => {
+        document.body.classList.remove('cursor-active');
+      });
+
+      // Select interactive nodes
+      document.addEventListener('mouseover', (e) => {
+        if (e.target.classList.contains('clickable') || e.target.closest('.clickable')) {
+          glow.style.borderColor = 'rgba(217, 149, 67, 0.7)';
+          glow.style.backgroundColor = 'rgba(217, 149, 67, 0.08)';
+          glow.style.transform = 'translate(-50%, -50%) scale(1.3)';
+          cursor.style.backgroundColor = 'var(--oro-warm)';
+        }
+      });
+
+      document.addEventListener('mouseout', (e) => {
+        if (e.target.classList.contains('clickable') || e.target.closest('.clickable')) {
+          glow.style.borderColor = 'rgba(154, 217, 91, 0.4)';
+          glow.style.backgroundColor = 'rgba(154, 217, 91, 0.03)';
+          glow.style.transform = 'translate(-50%, -50%) scale(1)';
+          cursor.style.backgroundColor = 'var(--verde-limon)';
+        }
+      });
+    })();
+
+    /* ==========================================================================
+       4. CENTRAL TITLE & PHRASE SLIDER
+       ========================================================================== */
+    const phraseTrack = document.getElementById('phraseTrack');
+    let currentPhraseIndex = 0;
+
+    // Populate phrases
+    FRASES_CENTRALES.forEach((phrase, idx) => {
+      const item = document.createElement('div');
+      item.className = 'phrase-item' + (idx === 0 ? ' active' : '');
+      item.textContent = phrase;
+      phraseTrack.appendChild(item);
+    });
+
+    // Animate cycling slider
+    setInterval(() => {
+      const items = phraseTrack.querySelectorAll('.phrase-item');
+      items[currentPhraseIndex].classList.remove('active');
+      
+      currentPhraseIndex = (currentPhraseIndex + 1) % FRASES_CENTRALES.length;
+      
+      phraseTrack.style.transform = `translateY(${-currentPhraseIndex * 35}px)`;
+      items[currentPhraseIndex].classList.add('active');
+    }, 4500);
+
+    /* ==========================================================================
+       5. MODALS & CONTENTS INJECTION POPULATING
+       ========================================================================== */
+    
+    // Core state management for active modal
+    let activeModalId = null;
+
+    function openModal(id) {
+      closeActiveModal();
+      
+      const modal = document.getElementById('modal-' + id);
+      if (modal) {
+        modal.classList.add('active');
+        activeModalId = id;
+        
+        // Custom events / updates per modal opened
+        if (id === 'wallpapers') {
+          renderAllWallpapers();
+        } else if (id === 'science') {
+          renderScienceGrid();
+        } else if (id === 'studio') {
+          initStudioEngine();
+        }
+      }
+    }
+
+    function closeActiveModal() {
+      if (activeModalId) {
+        const modal = document.getElementById('modal-' + activeModalId);
+        if (modal) {
+          modal.classList.remove('active');
+        }
+        
+        // Specific cleanup operations
+        if (activeModalId === 'studio') {
+          stopCameraStream();
+        }
+        
+        activeModalId = null;
+      }
+    }
+
+    // Escape button closer
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeActiveModal();
+      }
+    });
+
+    // Close on overlay backdrop clicked
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          closeActiveModal();
+        }
+      });
+    });
+
+    // -- Populate TIMELINE --
+    const timelineContainer = document.getElementById('timelineContainer');
+    HITOS_HISTORIA.forEach(item => {
+      const block = document.createElement('div');
+      block.className = 'timeline-block';
+      block.innerHTML = `
+        <div class="timeline-node"></div>
+        <div class="timeline-year">${item.year}</div>
+        <div class="timeline-text">${item.text}</div>
+      `;
+      timelineContainer.appendChild(block);
+    });
+
+    // -- Generate & Populate WALLPAPERS --
+    const wallpapersGrid = document.getElementById('wallpapersGrid');
+    
+    function renderAllWallpapers() {
+      if (wallpapersGrid.children.length > 0) return; // Render once
+      
+      WALLPAPERS_DATA.forEach(wp => {
+        const item = document.createElement('div');
+        item.className = 'wallpaper-item';
+        
+        const canvas = document.createElement('canvas');
+        canvas.className = 'wallpaper-preview-canvas';
+        canvas.width = 180;
+        canvas.height = 320;
+        item.appendChild(canvas);
+        
+        // Draw decorative patterns
+        drawWpCanvas(canvas, wp.style, wp.name);
+        
+        const info = document.createElement('div');
+        info.className = 'wallpaper-info';
+        info.innerHTML = `
+          <div class="wallpaper-name">${wp.name}</div>
+          <div class="wallpaper-actions">
+            <button class="wallpaper-btn clickable" onclick="downloadWallPaperFile('${wp.style}', '${wp.name}')">Móvil</button>
+            <button class="wallpaper-btn clickable" onclick="downloadWallPaperFile('${wp.style}', '${wp.name}', true)">Desktop</button>
+          </div>
+        `;
+        item.appendChild(info);
+        wallpapersGrid.appendChild(item);
+      });
+    }
+
+    // Helper canvas painter for preview backgrounds
+    function drawWpCanvas(canvas, style, name, isHighRes = false) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      
+      ctx.clearRect(0,0,w,h);
+      
+      // Gradient background bases
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      if (style === 'hologram') {
+        grad.addColorStop(0, '#0E3659');
+        grad.addColorStop(0.5, '#051320');
+        grad.addColorStop(1, '#9AD95B');
+      } else if (style === 'library') {
+        grad.addColorStop(0, '#0E3659');
+        grad.addColorStop(1, '#051320');
+      } else if (style === 'sculpture') {
+        grad.addColorStop(0, '#051320');
+        grad.addColorStop(0.7, '#0E3659');
+        grad.addColorStop(1, '#B4D98F');
+      } else if (style === 'gold') {
+        grad.addColorStop(0, '#0E3659');
+        grad.addColorStop(1, '#D99543');
+      } else {
+        grad.addColorStop(0, '#051320');
+        grad.addColorStop(1, '#0E3659');
+      }
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,w,h);
+      
+      // Abstract art elements
+      ctx.save();
+      ctx.translate(w/2, h/2 - 20);
+      
+      if (style === 'hologram') {
+        // Digital cyber orbits
+        ctx.strokeStyle = 'rgba(154, 217, 91, 0.25)';
+        ctx.lineWidth = isHighRes ? 4 : 1.5;
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.ellipse(0, 0, (i + 1) * (w*0.08), (i + 1) * (w*0.16), Math.PI/6 * i, 0, Math.PI*2);
+          ctx.stroke();
+        }
+      } else if (style === 'library') {
+        // Geometric abstract representation of O'Gorman mural blocks
+        ctx.strokeStyle = 'rgba(217, 149, 67, 0.3)';
+        ctx.lineWidth = isHighRes ? 3 : 1;
+        ctx.strokeRect(-w*0.25, -w*0.25, w*0.5, w*0.5);
+        ctx.strokeRect(-w*0.15, -w*0.15, w*0.3, w*0.3);
+        ctx.beginPath();
+        ctx.moveTo(0, -w*0.25); ctx.lineTo(0, w*0.25);
+        ctx.moveTo(-w*0.25, 0); ctx.lineTo(w*0.25, 0);
+        ctx.stroke();
+      } else if (style === 'sculpture') {
+        // Concentric wedge rings
+        ctx.strokeStyle = 'rgba(180, 217, 143, 0.3)';
+        ctx.lineWidth = isHighRes ? 6 : 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, w*0.25, 0, Math.PI*2);
+        ctx.stroke();
+        
+        ctx.fillStyle = 'rgba(154, 217, 91, 0.1)';
+        for (let a = 0; a < Math.PI*2; a += Math.PI/6) {
+          ctx.beginPath();
+          ctx.arc(Math.cos(a)*w*0.25, Math.sin(a)*w*0.25, isHighRes ? 10 : 3, 0, Math.PI*2);
+          ctx.fill();
+        }
+      } else if (style === 'gold') {
+        // Concentric luxury rings
+        ctx.strokeStyle = 'rgba(217, 149, 67, 0.4)';
+        ctx.lineWidth = isHighRes ? 4 : 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, w*0.22, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, w*0.28, 0, Math.PI*2);
+        ctx.stroke();
+      } else {
+        // Cyber wireframe puma shape representation (simplified abstract triangles)
+        ctx.strokeStyle = 'rgba(154, 217, 91, 0.3)';
+        ctx.lineWidth = isHighRes ? 4 : 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -w*0.25);
+        ctx.lineTo(w*0.2, -w*0.1);
+        ctx.lineTo(w*0.15, w*0.15);
+        ctx.lineTo(-w*0.15, w*0.15);
+        ctx.lineTo(-w*0.2, -w*0.1);
+        ctx.closePath();
+        ctx.stroke();
+      }
+      
+      ctx.restore();
+      
+      // Branding Footer on Wallpaper
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#F2F1F0';
+      ctx.font = `bold ${isHighRes ? '60px' : '15px'} serif`;
+      ctx.fillText("475 AÑOS", w/2, h - (isHighRes ? 160 : 45));
+      
+      ctx.fillStyle = '#D99543';
+      ctx.font = `${isHighRes ? '28px' : '7px'} ${isHighRes ? "Space Grotesk" : "sans-serif"}`;
+      ctx.fillText("UNAM • CONCEBIR FUTUROS", w/2, h - (isHighRes ? 110 : 32));
+    }
+
+    // High resolution direct downloader for wallpapers
+    window.downloadWallPaperFile = function(style, name, isDesktop = false) {
+      const dlCanvas = document.createElement('canvas');
+      dlCanvas.width = isDesktop ? 1920 : 1080;
+      dlCanvas.height = isDesktop ? 1080 : 1920;
+      
+      drawWpCanvas(dlCanvas, style, name, true);
+      
+      const link = document.createElement('a');
+      link.download = `UNAM475-Wallpaper-${name.replace(/\s+/g, '')}-${isDesktop?'Desktop':'Movil'}.png`;
+      link.href = dlCanvas.toDataURL('image/png');
+      link.click();
+      
+      showToastNotification("Descargando Wallpaper");
+    }
+
+    // -- Populate AGENDA EVENTS --
+    const eventsList = document.getElementById('eventsList');
+    const eventsTabs = document.getElementById('eventsTabs');
+    let activeEventCategory = 'Todos';
+
+    function renderEvents() {
+      eventsList.innerHTML = '';
+      
+      const filtered = activeEventCategory === 'Todos' 
+        ? EVENTOS_DATA 
+        : EVENTOS_DATA.filter(ev => ev.category === activeEventCategory);
+        
+      filtered.forEach(ev => {
+        const [day, month] = ev.date.split(' ');
+        const card = document.createElement('div');
+        card.className = 'event-card';
+        card.innerHTML = `
+          <div class="event-date-badge">
+            <span class="event-day">${day}</span>
+            <span class="event-month">${month}</span>
+          </div>
+          <div class="event-details">
+            <div class="event-type-label">${ev.category}</div>
+            <h4 class="event-card-title">${ev.title}</h4>
+            <div class="event-meta">
+              <span>📍 ${ev.place}</span>
+              <span>🕒 ${ev.time}</span>
+            </div>
+          </div>
+        `;
+        eventsList.appendChild(card);
+      });
+    }
+
+    // Setup Category Tabs
+    const categories = ['Todos', 'Ciencia', 'Cultura', 'Academia', 'Deportes'];
+    categories.forEach((cat, idx) => {
+      const tab = document.createElement('button');
+      tab.className = 'event-tab clickable' + (idx === 0 ? ' active' : '');
+      tab.textContent = cat;
+      tab.addEventListener('click', () => {
+        eventsTabs.querySelectorAll('.event-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeEventCategory = cat;
+        renderEvents();
+      });
+      eventsTabs.appendChild(tab);
+    });
+
+    renderEvents(); // Immediate call to populate list
+
+    // -- Populate CIENCIA Y CULTURA --
+    const scienceGrid = document.getElementById('scienceGrid');
+    
+    function renderScienceGrid() {
+      if (scienceGrid.children.length > 0) return;
+      
+      CIENCIA_DATA.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'science-card';
+        
+        // Mock SVG decorative visualizers inside cards
+        let visualSvg = '';
+        if (item.style === 'stars') {
+          visualSvg = `<path d="M10 20 L50 90 L90 20 M30 50 L70 50" stroke="var(--verde-salvia)" stroke-width="2"/>`;
+        } else if (item.style === 'cyber') {
+          visualSvg = `<circle cx="50" cy="50" r="30" stroke="var(--oro-warm)" stroke-width="1.5" stroke-dasharray="5,5"/><polyline points="20,20 50,50 80,80" stroke="var(--verde-limon)" stroke-width="2"/>`;
+        } else if (item.style === 'art') {
+          visualSvg = `<rect x="25" y="25" width="50" height="50" stroke="var(--oro-warm)" stroke-width="2" fill="none"/><line x1="25" y1="25" x2="75" y2="75" stroke="var(--verde-salvia)" stroke-width="1"/>`;
+        } else {
+          visualSvg = `<path d="M10 80 Q50 20 90 80" stroke="var(--verde-salvia)" stroke-width="2"/>`;
+        }
+
+        card.innerHTML = `
+          <div class="science-image-mock">
+            <svg width="100" height="100" viewBox="0 0 100 100" style="opacity: 0.65;">
+              ${visualSvg}
+            </svg>
+            <div class="science-card-icon-floater">
+              <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            </div>
+          </div>
+          <div class="science-content">
+            <div>
+              <div class="science-tag-pill">${item.tag}</div>
+              <h4 class="science-title">${item.title}</h4>
+              <p class="science-desc">${item.desc}</p>
+            </div>
+          </div>
+        `;
+        scienceGrid.appendChild(card);
+      });
+    }
+
+    // -- Populate REDES SOCIALES --
+    const socialHubGrid = document.getElementById('socialHubGrid');
+    REDES_DATA.forEach(item => {
+      const card = document.createElement('a');
+      card.href = item.link;
+      card.target = '_blank';
+      card.className = `social-hub-card ${item.id} clickable`;
+      card.innerHTML = `
+        <div class="social-icon-wrapper">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">${item.svg}</svg>
+        </div>
+        <span class="social-hub-name">${item.name}</span>
+      `;
+      socialHubGrid.appendChild(card);
+    });
+
+    // -- Populate RECURSOS --
+    const resourcesLinks = document.getElementById('resourcesLinks');
+    RECURSOS_DATA.forEach(item => {
+      const link = document.createElement('a');
+      link.href = item.link;
+      link.target = '_blank';
+      link.className = 'resource-link-btn clickable';
+      link.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span>${item.name}</span>
+          <span style="font-size: 0.6rem; opacity: 0.6;">Formato: ${item.format}</span>
+        </div>
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      `;
+      resourcesLinks.appendChild(link);
+    });
+
+
+    /* ==========================================================================
+       6. MOST IMPORTANT MODULE: CANVAS POSTCARD CREATIVE STUDIO
+       ========================================================================== */
+    
+    // Global editor structural state
+    let studioState = {
+      image: null,
+      x: 0,
+      y: 0,
+      scale: 1,
+      rotation: 0,
+      filter: 'none',
+      bgIndex: 0,
+      frameIndex: 1,
+      stickers: [], // Array of { type, x, y, scale, rotation }
+      activeStickerIndex: -1,
+      customText: '',
+      textColor: '#F2F1F0',
+      textGlow: false
+    };
+
+    let studioCanvas, studioCtx;
+    let isDragging = false;
+    let startX, startY;
+    let videoStream = null;
+    let isCameraLive = false;
+    let cameraAnimationId = null;
+
+    // Interactive vectors rendered procedurally to support high res scaling without assets
+    const VEK_SHIELDS = {
+      crest: function(ctx, cx, cy, r) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.strokeStyle = 'var(--oro-warm)';
+        ctx.lineWidth = r*0.06;
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.arc(cx, cy, r*0.85, 0, Math.PI*2);
+        ctx.strokeStyle = 'var(--verde-salvia)';
+        ctx.lineWidth = r*0.02;
+        ctx.stroke();
+
+        ctx.font = `bold ${r*0.2}px serif`;
+        ctx.fillStyle = 'var(--oro-warm)';
+        ctx.textAlign = 'center';
+        ctx.fillText("Patria", cx, cy - r*0.1);
+        ctx.font = `${r*0.13}px sans-serif`;
+        ctx.fillText("UNAM", cx, cy + r*0.2);
+      },
+      puma: function(ctx, cx, cy, r) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.strokeStyle = 'var(--oro-warm)';
+        ctx.fillStyle = 'rgba(14, 54, 89, 0.7)';
+        ctx.lineWidth = r*0.06;
+        
+        // Classic stylized triangular Puma shape outline
+        ctx.beginPath();
+        ctx.moveTo(0, -r*0.7);
+        ctx.lineTo(r*0.6, -r*0.3);
+        ctx.lineTo(r*0.5, r*0.5);
+        ctx.lineTo(r*0.2, r*0.3);
+        ctx.lineTo(0, r*0.7);
+        ctx.lineTo(-r*0.2, r*0.3);
+        ctx.lineTo(-r*0.5, r*0.5);
+        ctx.lineTo(-r*0.6, -r*0.3);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        // Eyes representation
+        ctx.fillStyle = 'var(--verde-limon)';
+        ctx.beginPath();
+        ctx.arc(-r*0.2, -r*0.1, r*0.07, 0, Math.PI*2);
+        ctx.arc(r*0.2, -r*0.1, r*0.07, 0, Math.PI*2);
+        ctx.fill();
+        
+        ctx.restore();
+      },
+      number475: function(ctx, cx, cy, r) {
+        ctx.font = `bold ${r*0.48}px serif`;
+        ctx.fillStyle = 'var(--oro-warm)';
+        ctx.textAlign = 'center';
+        ctx.fillText("475 Años", cx, cy + r*0.1);
+        
+        ctx.font = `${r*0.15}px sans-serif`;
+        ctx.fillStyle = 'var(--verde-limon)';
+        ctx.fillText("CONCEBIR FUTUROS", cx, cy + r*0.35);
+      },
+      goya: function(ctx, cx, cy, r) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.fillStyle = 'var(--verde-limon)';
+        ctx.strokeStyle = 'var(--blanco-hueso)';
+        ctx.lineWidth = r*0.05;
+        
+        // Talk bubble shape
+        ctx.beginPath();
+        ctx.ellipse(0, 0, r*0.7, r*0.4, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.font = `bold ${r*0.25}px sans-serif`;
+        ctx.fillStyle = 'var(--negro-profundo)';
+        ctx.textAlign = 'center';
+        ctx.fillText("¡GOYA!", 0, r*0.08);
+        ctx.restore();
+      },
+      atom: function(ctx, cx, cy, r) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.strokeStyle = 'var(--verde-limon)';
+        ctx.lineWidth = r*0.03;
+        
+        // 3 Elliptical orbits
+        for (let i = 0; i < 3; i++) {
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r*0.7, r*0.2, (Math.PI/3) * i, 0, Math.PI*2);
+          ctx.stroke();
+        }
+        
+        // Central nucleus
+        ctx.fillStyle = 'var(--oro-warm)';
+        ctx.beginPath();
+        ctx.arc(0, 0, r*0.12, 0, Math.PI*2);
+        ctx.fill();
+        
+        ctx.restore();
+      }
+    };
+
+    function initStudioEngine() {
+      if (studioCanvas) return; // Already loaded
+
+      studioCanvas = document.getElementById('studio-canvas');
+      studioCtx = studioCanvas.getContext('2d');
+      
+      // Fixed High-Res export canvas coordinate space ($1080 \times 1080$)
+      studioCanvas.width = 1080;
+      studioCanvas.height = 1080;
+
+      // Register canvas touch & mouse listeners
+      studioCanvas.addEventListener('mousedown', startImageDrag);
+      studioCanvas.addEventListener('mousemove', processImageDrag);
+      document.addEventListener('mouseup', stopImageDrag);
+
+      studioCanvas.addEventListener('touchstart', startImageTouchDrag, {passive: false});
+      studioCanvas.addEventListener('touchmove', processImageTouchDrag, {passive: false});
+      document.addEventListener('touchend', stopImageDrag);
+
+      studioCanvas.addEventListener('wheel', processMouseWheel, {passive: false});
+
+      // Controls Binding
+      document.getElementById('scaleSlider').addEventListener('input', (e) => {
+        studioState.scale = parseFloat(e.target.value);
+        document.getElementById('scaleVal').textContent = studioState.scale.toFixed(1) + 'x';
+        drawStudio();
+      });
+
+      document.getElementById('rotateSlider').addEventListener('input', (e) => {
+        studioState.rotation = parseInt(e.target.value);
+        document.getElementById('rotateVal').textContent = studioState.rotation + '°';
+        drawStudio();
+      });
+
+      document.getElementById('customTextInput').addEventListener('input', (e) => {
+        studioState.customText = e.target.value;
+        drawStudio();
+      });
+
+      document.getElementById('textGlowToggle').addEventListener('change', (e) => {
+        studioState.textGlow = e.target.checked;
+        drawStudio();
+      });
+
+      // Populate interactive Studio menus
+      buildSelectors();
+
+      // Trigger standard render
+      drawStudio();
+    }
+
+    // Interactive building for controls
+    function buildSelectors() {
+      // 1. Backgrounds
+      const bgSel = document.getElementById('bgSelector');
+      bgSel.innerHTML = '';
+      FONDOS_POSTAL.forEach((bg, idx) => {
+        const option = document.createElement('div');
+        option.className = 'gallery-option clickable' + (idx === studioState.bgIndex ? ' active' : '');
+        option.onclick = () => {
+          bgSel.querySelectorAll('.gallery-option').forEach(o => o.classList.remove('active'));
+          option.classList.add('active');
+          studioState.bgIndex = idx;
+          drawStudio();
+        };
+        
+        let visualStyle = '';
+        if (bg.type === 'gradient') {
+          visualStyle = `background: linear-gradient(135deg, ${bg.colors[0]}, ${bg.colors[1]});`;
+        } else {
+          visualStyle = `background: var(--azul-base);`;
+        }
+        
+        option.innerHTML = `
+          <div class="gallery-option-preview" style="${visualStyle}"></div>
+          <span>${bg.name}</span>
+        `;
+        bgSel.appendChild(option);
+      });
+
+      // 2. Filters
+      const filterSel = document.getElementById('filtersSelector');
+      filterSel.innerHTML = '';
+      FILTROS_POSTAL.forEach((fl, idx) => {
+        const option = document.createElement('div');
+        option.className = 'gallery-option clickable' + (fl.id === studioState.filter ? ' active' : '');
+        option.onclick = () => {
+          filterSel.querySelectorAll('.gallery-option').forEach(o => o.classList.remove('active'));
+          option.classList.add('active');
+          studioState.filter = fl.id;
+          drawStudio();
+        };
+        
+        option.innerHTML = `
+          <div class="gallery-option-preview" style="background: var(--verde-salvia); filter: ${fl.filter};"></div>
+          <span>${fl.name}</span>
+        `;
+        filterSel.appendChild(option);
+      });
+
+      // 3. Frames
+      const frameSel = document.getElementById('framesSelector');
+      frameSel.innerHTML = '';
+      MARCOS_POSTAL.forEach((fr, idx) => {
+        const option = document.createElement('div');
+        option.className = 'gallery-option clickable' + (idx === studioState.frameIndex ? ' active' : '');
+        option.onclick = () => {
+          frameSel.querySelectorAll('.gallery-option').forEach(o => o.classList.remove('active'));
+          option.classList.add('active');
+          studioState.frameIndex = idx;
+          drawStudio();
+        };
+        option.innerHTML = `
+          <div class="gallery-option-preview" style="border: 2px solid var(--oro-warm); background: transparent;"></div>
+          <span>${fr.name}</span>
+        `;
+        frameSel.appendChild(option);
+      });
+
+      // 4. Stickers Selection
+      const stickSel = document.getElementById('stickersSelector');
+      stickSel.innerHTML = '';
+      STICKERS_POSTAL.forEach((st) => {
+        const option = document.createElement('div');
+        option.className = 'gallery-option clickable';
+        option.onclick = () => {
+          // Add sticker to screen
+          studioState.stickers.push({
+            type: st.type,
+            x: 540,
+            y: 540,
+            scale: 1,
+            rotation: 0
+          });
+          studioState.activeStickerIndex = studioState.stickers.length - 1;
+          updateStickerControlsUI();
+          drawStudio();
+          showToastNotification("Sticker añadido");
+        };
+        
+        option.innerHTML = `
+          <div class="gallery-option-preview" style="background: rgba(242, 241, 240, 0.05);">
+            <svg width="24" height="24" viewBox="0 0 100 100" style="opacity: 0.85;">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--oro-warm)" stroke-width="4"/>
+              <text x="50" y="55" text-anchor="middle" font-size="12" fill="var(--blanco-hueso)">UNAM</text>
+            </svg>
+          </div>
+          <span>${st.name}</span>
+        `;
+        stickSel.appendChild(option);
+      });
+
+      // 5. Custom Text Colors
+      const colorSel = document.getElementById('textColorSelector');
+      colorSel.innerHTML = '';
+      TEXT_COLORS.forEach((col) => {
+        const option = document.createElement('div');
+        option.className = 'gallery-option clickable' + (col.hex === studioState.textColor ? ' active' : '');
+        option.onclick = () => {
+          colorSel.querySelectorAll('.gallery-option').forEach(o => o.classList.remove('active'));
+          option.classList.add('active');
+          studioState.textColor = col.hex;
+          drawStudio();
+        };
+        option.innerHTML = `
+          <div class="gallery-option-preview" style="background: ${col.hex};"></div>
+          <span>${col.name}</span>
+        `;
+        colorSel.appendChild(option);
+      });
+    }
+
+    // Toggle active Accordion
+    window.toggleAccordion = function(tabId) {
+      const activeTab = document.getElementById(tabId);
+      const isAlreadyActive = activeTab.classList.contains('active');
+      
+      // Close all tabs
+      document.querySelectorAll('.control-tab-wrapper').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Open if was not active
+      if (!isAlreadyActive) {
+        activeTab.classList.add('active');
+      }
+    };
+
+    // UI state adjustments when active sticker selected
+    function updateStickerControlsUI() {
+      const controlsBox = document.getElementById('selected-sticker-controls');
+      if (studioState.activeStickerIndex >= 0) {
+        controlsBox.style.display = 'block';
+      } else {
+        controlsBox.style.display = 'none';
+      }
+    }
+
+    window.transformActiveSticker = function(property, amount) {
+      const act = studioState.activeStickerIndex;
+      if (act >= 0 && studioState.stickers[act]) {
+        if (property === 'scale') {
+          studioState.stickers[act].scale = Math.max(0.2, studioState.stickers[act].scale + amount);
+        } else if (property === 'rotate') {
+          studioState.stickers[act].rotation += amount;
+        }
+        drawStudio();
+      }
+    };
+
+    window.deleteActiveSticker = function() {
+      const act = studioState.activeStickerIndex;
+      if (act >= 0) {
+        studioState.stickers.splice(act, 1);
+        studioState.activeStickerIndex = -1;
+        updateStickerControlsUI();
+        drawStudio();
+        showToastNotification("Sticker eliminado");
+      }
+    };
+
+    // ==========================================================================
+    // CAMERA / snapshots capturing features
+    // ==========================================================================
+    const hiddenVideo = document.getElementById('hidden-video');
+    const cameraToggleBtn = document.getElementById('cameraToggleBtn');
+    const snapshotBtn = document.getElementById('snapshotBtn');
+    const cameraOverlay = document.getElementById('cameraOverlay');
+    const fileUploadMockBtn = document.getElementById('fileUploadMockBtn');
+    const realFileInput = document.getElementById('realFileInput');
+
+    fileUploadMockBtn.addEventListener('click', () => {
+      realFileInput.click();
+    });
+
+    realFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        stopCameraStream(); // close camera if active
+        
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = new Image();
+          img.onload = function() {
+            studioState.image = img;
+            resetImageTransform();
+            drawStudio();
+            showToastNotification("Foto cargada con éxito");
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    cameraToggleBtn.addEventListener('click', () => {
+      if (isCameraLive) {
+        stopCameraStream();
+      } else {
+        startCameraStream();
+      }
+    });
+
+    function startCameraStream() {
+      cameraOverlay.classList.add('active');
+      
+      const constraints = {
+        video: {
+          facingMode: 'user',
+          width: { ideal: 720 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      };
+
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+          videoStream = stream;
+          hiddenVideo.srcObject = stream;
+          hiddenVideo.play();
+          
+          isCameraLive = true;
+          cameraOverlay.classList.remove('active');
+          document.getElementById('cameraBtnText').textContent = "Apagar Cámara";
+          snapshotBtn.style.display = 'flex';
+          
+          // Trigger live feed animation loop inside the studio canvas!
+          triggerLiveCameraFeed();
+        })
+        .catch(err => {
+          console.error("Camera access failed: ", err);
+          cameraOverlay.classList.remove('active');
+          showToastNotification("Permiso de Cámara Denegado");
+        });
+    }
+
+    function stopCameraStream() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+      isCameraLive = false;
+      document.getElementById('cameraBtnText').textContent = "Usar Cámara";
+      snapshotBtn.style.display = 'none';
+      
+      if (cameraAnimationId) {
+        cancelAnimationFrame(cameraAnimationId);
+        cameraAnimationId = null;
+      }
+      
+      drawStudio();
+    }
+
+    window.cancelCamera = function() {
+      cameraOverlay.classList.remove('active');
+      stopCameraStream();
+    };
+
+    function triggerLiveCameraFeed() {
+      if (!isCameraLive) return;
+
+      // Draw camera stream as live background photo!
+      if (hiddenVideo.readyState === hiddenVideo.HAVE_ENOUGH_DATA) {
+        // Just inject the video DOM directly into state as source
+        studioState.image = hiddenVideo;
+        drawStudio();
+      }
+      cameraAnimationId = requestAnimationFrame(triggerLiveCameraFeed);
+    }
+
+    // Freeze frame capture snapshot
+    snapshotBtn.addEventListener('click', () => {
+      if (isCameraLive && hiddenVideo.readyState === hiddenVideo.HAVE_ENOUGH_DATA) {
+        // Create an offscreen static image of the current frame to keep as source
+        const offscreenCanvas = document.createElement('canvas');
+        offscreenCanvas.width = hiddenVideo.videoWidth;
+        offscreenCanvas.height = hiddenVideo.videoHeight;
+        offscreenCanvas.getContext('2d').drawImage(hiddenVideo, 0, 0);
+        
+        const img = new Image();
+        img.onload = function() {
+          stopCameraStream(); // Close stream
+          studioState.image = img; // lock static image
+          drawStudio();
+          showToastNotification("Foto capturada");
+        };
+        img.src = offscreenCanvas.toDataURL('image/png');
+      }
+    });
+
+    // Reset translation matrix helper
+    window.resetImageTransform = function() {
+      studioState.x = 0;
+      studioState.y = 0;
+      studioState.scale = 1.0;
+      studioState.rotation = 0;
+      
+      document.getElementById('scaleSlider').value = 1.0;
+      document.getElementById('scaleVal').textContent = '1.0x';
+      
+      document.getElementById('rotateSlider').value = 0;
+      document.getElementById('rotateVal').textContent = '0°';
+      
+      drawStudio();
+    };
+
+    /* ==========================================================================
+       DRAGGING AND TOUCH INTERACTION ENGINE
+       ========================================================================== */
+    function getCanvasCoordinates(e) {
+      const rect = studioCanvas.getBoundingClientRect();
+      let clientX, clientY;
+      
+      if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
+
+      // Convert standard client coords to scaled canvas coordinates ($1080 \times 1080$)
+      return {
+        x: ((clientX - rect.left) / rect.width) * 1080,
+        y: ((clientY - rect.top) / rect.height) * 1080
+      };
+    }
+
+    function startImageDrag(e) {
+      const coords = getCanvasCoordinates(e);
+      isDragging = true;
+      startX = coords.x;
+      startY = coords.y;
+
+      // Check if clicked a sticker!
+      let clickedStickerIdx = -1;
+      // loop backwards to prioritize top layers
+      for (let i = studioState.stickers.length - 1; i >= 0; i--) {
+        const stk = studioState.stickers[i];
+        const dist = Math.sqrt((coords.x - stk.x)*(coords.x - stk.x) + (coords.y - stk.y)*(coords.y - stk.y));
+        if (dist < 80 * stk.scale) {
+          clickedStickerIdx = i;
+          break;
+        }
+      }
+
+      studioState.activeStickerIndex = clickedStickerIdx;
+      updateStickerControlsUI();
+      drawStudio();
+    }
+
+    function startImageTouchDrag(e) {
+      // Prevent screen scroll while manipulation is occurring inside canvas
+      e.preventDefault();
+      startImageDrag(e);
+    }
+
+    function processImageDrag(e) {
+      if (!isDragging) return;
+      const coords = getCanvasCoordinates(e);
+      const dx = coords.x - startX;
+      const dy = coords.y - startY;
+
+      startX = coords.x;
+      startY = coords.y;
+
+      if (studioState.activeStickerIndex >= 0) {
+        // Move active sticker
+        const activeSt = studioState.stickers[studioState.activeStickerIndex];
+        activeSt.x += dx;
+        activeSt.y += dy;
+      } else {
+        // Move background image
+        studioState.x += dx;
+        studioState.y += dy;
+      }
+
+      drawStudio();
+    }
+
+    function processImageTouchDrag(e) {
+      e.preventDefault();
+      processImageDrag(e);
+    }
+
+    function stopImageDrag() {
+      isDragging = false;
+    }
+
+    function processMouseWheel(e) {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.05 : 0.95;
+      
+      if (studioState.activeStickerIndex >= 0) {
+        const activeSt = studioState.stickers[studioState.activeStickerIndex];
+        activeSt.scale = Math.max(0.2, activeSt.scale * zoomFactor);
+      } else {
+        studioState.scale = Math.max(0.1, Math.min(4, studioState.scale * zoomFactor));
+        document.getElementById('scaleSlider').value = studioState.scale;
+        document.getElementById('scaleVal').textContent = studioState.scale.toFixed(1) + 'x';
+      }
+      
+      drawStudio();
+    }
+
+    /* ==========================================================================
+       CORE STUDIO CANVAS RENDERER LOOP
+       ========================================================================== */
+    function drawStudio() {
+      if (!studioCtx) return;
+
+      const w = studioCanvas.width;
+      const h = studioCanvas.height;
+
+      studioCtx.clearRect(0, 0, w, h);
+
+      // 1. Draw Institutional background base
+      const bg = FONDOS_POSTAL[studioState.bgIndex];
+      if (bg.type === 'gradient') {
+        const grad = studioCtx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, bg.colors[0]);
+        grad.addColorStop(1, bg.colors[1]);
+        studioCtx.fillStyle = grad;
+        studioCtx.fillRect(0, 0, w, h);
+      } else if (bg.type === 'volcanic') {
+        // Generative abstract Pedregal volcanic stone patterns
+        studioCtx.fillStyle = '#0E3659';
+        studioCtx.fillRect(0,0,w,h);
+        
+        studioCtx.strokeStyle = 'rgba(242, 241, 240, 0.05)';
+        studioCtx.lineWidth = 15;
+        // Draw chaotic lava lines
+        studioCtx.beginPath();
+        for (let i = 0; i < w; i += 120) {
+          studioCtx.moveTo(i, 0);
+          studioCtx.lineTo(i + (Math.sin(i)*80), h);
+        }
+        studioCtx.stroke();
+      } else if (bg.type === 'grid') {
+        // Tech spatial scientific coordinates grid
+        studioCtx.fillStyle = '#051320';
+        studioCtx.fillRect(0,0,w,h);
+        
+        studioCtx.strokeStyle = 'rgba(154, 217, 91, 0.08)';
+        studioCtx.lineWidth = 1;
+        // Vertical grid lines
+        for (let i = 0; i < w; i += 60) {
+          studioCtx.beginPath();
+          studioCtx.moveTo(i, 0); studioCtx.lineTo(i, h);
+          studioCtx.stroke();
+        }
+        // Horizontal grid lines
+        for (let j = 0; j < h; j += 60) {
+          studioCtx.beginPath();
+          studioCtx.moveTo(0, j); studioCtx.lineTo(w, j);
+          studioCtx.stroke();
+        }
+      }
+
+      // 2. Draw user loaded photo (with transform properties)
+      if (studioState.image) {
+        studioCtx.save();
+        
+        // Target positioning & translation matrices
+        studioCtx.translate(w / 2 + studioState.x, h / 2 + studioState.y);
+        studioCtx.rotate((studioState.rotation * Math.PI) / 180);
+        
+        // Filter processing (applied at drawing state level for max GPU performance)
+        const filterVal = FILTROS_POSTAL.find(f => f.id === studioState.filter);
+        if (filterVal) {
+          studioCtx.filter = filterVal.filter;
+        }
+
+        // Keep responsive aspect ratio
+        let imgWidth = studioState.image.naturalWidth || studioState.image.videoWidth || w;
+        let imgHeight = studioState.image.naturalHeight || studioState.image.videoHeight || h;
+        
+        // Scale to fit canvas workspace beautifully
+        const ratio = Math.max(w / imgWidth, h / imgHeight) * studioState.scale;
+        const dw = imgWidth * ratio;
+        const dh = imgHeight * ratio;
+
+        studioCtx.drawImage(studioState.image, -dw / 2, -dh / 2, dw, dh);
+        
+        studioCtx.restore();
+      } else {
+        // Empty state watermark design
+        studioCtx.textAlign = 'center';
+        studioCtx.fillStyle = 'rgba(242, 241, 240, 0.2)';
+        studioCtx.font = 'bold 36px "Space Grotesk"';
+        studioCtx.fillText("CARGA UNA FOTO O ACTIVA CÁMARA", w/2, h/2 - 20);
+        studioCtx.font = '20px Outfit';
+        studioCtx.fillText("Para empezar a crear tu postal histórica", w/2, h/2 + 20);
+      }
+
+      // 3. Draw Stickers
+      studioState.stickers.forEach((stk, idx) => {
+        studioCtx.save();
+        studioCtx.translate(stk.x, stk.y);
+        studioCtx.rotate((stk.rotation * Math.PI) / 180);
+        
+        // Render vectorized crisp stickers
+        const renderer = VEK_SHIELDS[stk.type];
+        if (renderer) {
+          renderer(studioCtx, 0, 0, 110 * stk.scale);
+        }
+
+        // Draw dotted selection box if active
+        if (idx === studioState.activeStickerIndex) {
+          studioCtx.strokeStyle = 'var(--verde-limon)';
+          studioCtx.lineWidth = 3;
+          studioCtx.setLineDash([5, 5]);
+          studioCtx.strokeRect(-120 * stk.scale, -120 * stk.scale, 240 * stk.scale, 240 * stk.scale);
+        }
+
+        studioCtx.restore();
+      });
+
+      // 4. Draw Conmemorative Frames (Borders overlay)
+      drawActiveFrame(w, h);
+
+      // 5. Draw customized text signature
+      if (studioState.customText.trim() !== '') {
+        studioCtx.save();
+        studioCtx.textAlign = 'center';
+        studioCtx.fillStyle = studioState.textColor;
+        
+        // Font structure
+        studioCtx.font = 'bold 32px "Space Grotesk"';
+        
+        // Text glow feature
+        if (studioState.textGlow) {
+          studioCtx.shadowColor = 'var(--verde-limon)';
+          studioCtx.shadowBlur = 15;
+        }
+
+        // Place at safe margin area
+        studioCtx.fillText(studioState.customText.toUpperCase(), w/2, h - 85);
+        studioCtx.restore();
+      }
+    }
+
+    // Frame styling overlay rendering details
+    function drawActiveFrame(w, h) {
+      const idx = studioState.frameIndex;
+      if (idx === 0) return; // None
+
+      studioCtx.save();
+      
+      if (idx === 1) {
+        // ORO CLÁSICO (Elegant gold double line & classic fonts)
+        studioCtx.strokeStyle = '#D99543';
+        studioCtx.lineWidth = 14;
+        studioCtx.strokeRect(20, 20, w - 40, h - 40);
+
+        studioCtx.lineWidth = 2;
+        studioCtx.strokeRect(32, 32, w - 64, h - 64);
+
+        // Frame corners decorations
+        studioCtx.fillStyle = '#D99543';
+        const d = 45;
+        studioCtx.fillRect(20, 20, d, d);
+        studioCtx.fillRect(w - 20 - d, 20, d, d);
+        studioCtx.fillRect(20, h - 20 - d, d, d);
+        studioCtx.fillRect(w - 20 - d, h - 20 - d, d, d);
+
+        // Header Frame Label
+        studioCtx.fillStyle = '#D99543';
+        studioCtx.font = 'bold 24px "Space Grotesk"';
+        studioCtx.letterSpacing = '5px';
+        studioCtx.textAlign = 'center';
+        studioCtx.fillText("UNAM • 475 AÑOS", w/2, 60);
+
+        // Footer Frame concept
+        studioCtx.font = 'italic 20px serif';
+        studioCtx.fillText("Concebir Futuros", w/2, h - 48);
+
+      } else if (idx === 2) {
+        // CIBERNÉTICO (HUD scientific green vector markers)
+        studioCtx.strokeStyle = '#9AD95B';
+        studioCtx.lineWidth = 3;
+        studioCtx.strokeRect(30, 30, w - 60, h - 60);
+
+        // Tech corners
+        const l = 60;
+        studioCtx.lineWidth = 6;
+        // Top-left
+        studioCtx.beginPath(); studioCtx.moveTo(27, 27 + l); studioCtx.lineTo(27, 27); studioCtx.lineTo(27 + l, 27); studioCtx.stroke();
+        // Top-right
+        studioCtx.beginPath(); studioCtx.moveTo(w - 27 - l, 27); studioCtx.lineTo(w - 27, 27); studioCtx.lineTo(w - 27, 27 + l); studioCtx.stroke();
+        // Bottom-left
+        studioCtx.beginPath(); studioCtx.moveTo(27, h - 27 - l); studioCtx.lineTo(27, h - 27); studioCtx.lineTo(27 + l, h - 27); studioCtx.stroke();
+        // Bottom-right
+        studioCtx.beginPath(); studioCtx.moveTo(w - 27 - l, h - 27); studioCtx.lineTo(w - 27, h - 27); studioCtx.lineTo(w - 27, h - 27 - l); studioCtx.stroke();
+
+        // Technical scanner overlays
+        studioCtx.strokeStyle = 'rgba(154, 217, 91, 0.4)';
+        studioCtx.lineWidth = 1.5;
+        // Vertical lines
+        studioCtx.beginPath(); studioCtx.moveTo(w*0.2, 30); studioCtx.lineTo(w*0.2, 50); studioCtx.stroke();
+        studioCtx.beginPath(); studioCtx.moveTo(w*0.8, 30); studioCtx.lineTo(w*0.8, 50); studioCtx.stroke();
+        // Center reticle indicators
+        studioCtx.strokeRect(w/2 - 15, 30, 30, 10);
+
+        studioCtx.fillStyle = '#9AD95B';
+        studioCtx.font = 'bold 20px "Space Grotesk"';
+        studioCtx.textAlign = 'center';
+        studioCtx.fillText("INFRAESTRUCTURA DE CONOCIMIENTO", w/2, 70);
+
+      } else if (idx === 3) {
+        // ORGULLO PUMA (Cream borders, golden graphics)
+        studioCtx.strokeStyle = '#F2F1F0';
+        studioCtx.lineWidth = 8;
+        studioCtx.strokeRect(25, 25, w - 50, h - 50);
+
+        // Draw geometric pumas in the lower corners
+        VEK_SHIELDS.puma(studioCtx, 80, h - 80, 45);
+        VEK_SHIELDS.puma(studioCtx, w - 80, h - 80, 45);
+
+        // Huge conmemorative typography
+        studioCtx.fillStyle = '#D99543';
+        studioCtx.font = 'bold 36px serif';
+        studioCtx.textAlign = 'center';
+        studioCtx.fillText("475 AÑOS", w/2, 75);
+
+        studioCtx.fillStyle = '#F2F1F0';
+        studioCtx.font = 'bold 16px "Space Grotesk"';
+        studioCtx.fillText("UNIVERSIDAD NACIONAL AUTÓNOMA DE MÉXICO", w/2, 105);
+      }
+
+      studioCtx.restore();
+    }
+
+    // Direct High-Res PNG downloader
+    window.downloadStudioPostal = function() {
+      if (!studioState.image) {
+        showToastNotification("Carga una foto primero");
+        return;
+      }
+
+      // Temporarily clear active sticker selection indicator box for printing
+      const tempIdx = studioState.activeStickerIndex;
+      studioState.activeStickerIndex = -1;
+      drawStudio(); // render clean image
+
+      const link = document.createElement('a');
+      link.download = `UNAM475-Postal-${Date.now()}.png`;
+      link.href = studioCanvas.toDataURL('image/png');
+      link.click();
+
+      // Restore selection indicators
+      studioState.activeStickerIndex = tempIdx;
+      drawStudio();
+
+      showToastNotification("Postal descargada");
+    };
+
+    // Social Sharing handler (Web Share API integration)
+    window.shareStudioPostal = function() {
+      if (!studioState.image) {
+        showToastNotification("Carga una foto primero");
+        return;
+      }
+
+      const tempIdx = studioState.activeStickerIndex;
+      studioState.activeStickerIndex = -1;
+      drawStudio();
+
+      studioCanvas.toBlob((blob) => {
+        // Restore indicators immediately
+        studioState.activeStickerIndex = tempIdx;
+        drawStudio();
+
+        const file = new File([blob], `postal-unam475.png`, { type: 'image/png' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({
+            files: [file],
+            title: 'Postal UNAM 475',
+            text: '¡Celebro los 475 años de la UNAM concibiendo futuros desde el portal cautivo! 🎓 #UNAM475'
+          })
+          .then(() => showToastNotification("Compartido con éxito"))
+          .catch(() => {});
+        } else {
+          // Fallback copy links
+          navigator.clipboard.writeText("¡Celebro los 475 años de la UNAM! Diseña tu postal en: https://475.unam.mx 🎓 #UNAM475");
+          showToastNotification("Enlace copiado al portapapeles");
+        }
+      }, 'image/png');
+    };
+
+
+    /* ==========================================================================
+       7. GLOBAL NOTIFICATION SYSTEM (Holographic custom toasts)
+       ========================================================================== */
+    const toast = document.getElementById('system-toast');
+    const toastMsg = document.getElementById('toast-message');
+    let toastTimeout;
+
+    function showToastNotification(message) {
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+
+      toastMsg.textContent = message;
+      toast.classList.add('active');
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('active');
+      }, 3000);
+    }
+
+    // Direct redirection release triggers (WiFi Captive Portals)
+    document.getElementById('portalMainBtn').addEventListener('click', () => {
+      showToastNotification("Conexión WiFi Iniciada...");
+    });
+  </script>
+</body>
+</html>
