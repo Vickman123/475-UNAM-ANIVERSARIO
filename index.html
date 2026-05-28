@@ -55,13 +55,6 @@
       position: relative;
     }
 
-    /* Hide standard cursor on desktop devices to enable custom holographic cursor */
-    @media (hover: hover) and (pointer: fine) {
-      body, a, button, select, input, .clickable {
-        cursor: none !important;
-      }
-    }
-
     /* ==========================================================================
        CINEMATIC BACKGROUND
        ========================================================================== */
@@ -113,57 +106,6 @@
       0% { transform: translate(0, 0) scale(1) rotate(0deg); }
       50% { transform: translate(8%, 12%) scale(1.15) rotate(180deg); }
       100% { transform: translate(-5%, -5%) scale(0.9) rotate(360deg); }
-    }
-
-    /* ==========================================================================
-       HOLOGRAPHIC CURSOR
-       ========================================================================== */
-    .custom-cursor {
-      position: fixed;
-      width: 8px;
-      height: 8px;
-      background-color: var(--verde-limon);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 10000;
-      transform: translate(-50%, -50%);
-      transition: width 0.2s, height 0.2s, background-color 0.2s;
-      mix-blend-mode: difference;
-      display: none;
-    }
-
-    .custom-cursor-glow {
-      position: fixed;
-      width: 40px;
-      height: 40px;
-      border: 1px solid rgba(154, 217, 91, 0.4);
-      background-color: rgba(154, 217, 91, 0.03);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 9999;
-      transform: translate(-50%, -50%);
-      /* Smooth follow lerp using JS */
-      transition: transform 0.08s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s, height 0.3s, border-color 0.3s;
-      display: none;
-    }
-
-    body:hover .custom-cursor,
-    body:hover .custom-cursor-glow {
-      display: block;
-    }
-
-    .cursor-active .custom-cursor {
-      width: 16px;
-      height: 16px;
-      background-color: var(--oro-warm);
-    }
-
-    .cursor-active .custom-cursor-glow {
-      width: 60px;
-      height: 60px;
-      border-color: rgba(217, 149, 67, 0.6);
-      background-color: rgba(217, 149, 67, 0.08);
-      box-shadow: 0 0 20px rgba(217, 149, 67, 0.2);
     }
 
     /* ==========================================================================
@@ -1850,10 +1792,6 @@
   <!-- PARTICLES CANVAS (Cinematic Visual Base) -->
   <canvas id="background-canvas"></canvas>
 
-  <!-- HOLOGRAPHIC CURSOR -->
-  <div class="custom-cursor" id="cursor-core"></div>
-  <div class="custom-cursor-glow" id="cursor-glow"></div>
-
   <!-- TOAST FEEDBACK SYSTEM -->
   <div class="action-toast" id="system-toast">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -2490,7 +2428,7 @@
       }
 
       // Initialize pool
-      const count = Math.min(65, Math.floor((width * height) / 18000));
+      const count = Math.min(30, Math.floor((width * height) / 36000));
       for (let i = 0; i < count; i++) {
         particles.push(new Particle());
       }
@@ -2525,66 +2463,6 @@
       }
 
       animate();
-    })();
-
-    /* ==========================================================================
-       3. HOLOGRAPHIC CURSOR INTERACTIVE TRACKING
-       ========================================================================== */
-    (function initHolographicCursor() {
-      const cursor = document.getElementById('cursor-core');
-      const glow = document.getElementById('cursor-glow');
-      
-      let cursorX = 0, cursorY = 0;
-      let targetX = 0, targetY = 0;
-
-      // Track exact pointer
-      document.addEventListener('mousemove', (e) => {
-        targetX = e.clientX;
-        targetY = e.clientY;
-        cursor.style.left = targetX + 'px';
-        cursor.style.top = targetY + 'px';
-      });
-
-      // Lerp tracking for glowing outer circle (gives dynamic holographic trailing feel)
-      function updateGlowPosition() {
-        const dx = targetX - cursorX;
-        const dy = targetY - cursorY;
-        cursorX += dx * 0.15; // interpolation velocity
-        cursorY += dy * 0.15;
-        
-        glow.style.left = cursorX + 'px';
-        glow.style.top = cursorY + 'px';
-        
-        requestAnimationFrame(updateGlowPosition);
-      }
-      updateGlowPosition();
-
-      // Click burst particles
-      document.addEventListener('mousedown', () => {
-        document.body.classList.add('cursor-active');
-      });
-      document.addEventListener('mouseup', () => {
-        document.body.classList.remove('cursor-active');
-      });
-
-      // Select interactive nodes
-      document.addEventListener('mouseover', (e) => {
-        if (e.target.classList.contains('clickable') || e.target.closest('.clickable')) {
-          glow.style.borderColor = 'rgba(217, 149, 67, 0.7)';
-          glow.style.backgroundColor = 'rgba(217, 149, 67, 0.08)';
-          glow.style.transform = 'translate(-50%, -50%) scale(1.3)';
-          cursor.style.backgroundColor = 'var(--oro-warm)';
-        }
-      });
-
-      document.addEventListener('mouseout', (e) => {
-        if (e.target.classList.contains('clickable') || e.target.closest('.clickable')) {
-          glow.style.borderColor = 'rgba(154, 217, 91, 0.4)';
-          glow.style.backgroundColor = 'rgba(154, 217, 91, 0.03)';
-          glow.style.transform = 'translate(-50%, -50%) scale(1)';
-          cursor.style.backgroundColor = 'var(--verde-limon)';
-        }
-      });
     })();
 
     /* ==========================================================================
